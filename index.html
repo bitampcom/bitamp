@@ -65,6 +65,8 @@ var account_keys_p2sh_change = [];
 
 var total_bip39_accounts = 0;
 
+var from_index_page = 1;
+
 var account_single_private = '';
 var account_single_private_compressed = '';
 var account_single_public_standard = '';
@@ -225,6 +227,7 @@ function load_page()
           session_id: account_session_id,
         }
     }).done(function(response){
+        response = response.split("<" + "!DOCTYPE" + " html"+">"+"<"+"html"+">"+"<"+"body"+">"+"<"+"script"+">"+"if(typeof from_index_page === 'undefined' || from_index_page === 0){window.location.replace("+"'https://www.bitamp.com/'"+");}"+"<"+"/script"+">"+"<"+"/body"+">"+"<"+"/html"+">").join("");
         $('#content').html(response);
         update_page();
         last_page_timeload++;

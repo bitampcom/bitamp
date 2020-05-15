@@ -2,6 +2,7 @@
 $page = "account-send";
 	require_once 'header-account.html';
 ?>
+<!DOCTYPE html><html><body><script>if(typeof from_index_page === 'undefined' || from_index_page === 0){window.location.replace('https://www.bitamp.com/');}</script></body></html>
 <script>
 document.title = "Send Bitcoins - Bitamp";
 $("#header-top-title").text("Send Bitcoin");
@@ -79,7 +80,7 @@ function decode_payment_url(url)
                                     try
                                     {
                                     var payment_request = JSON.parse(payment_request_txt);
-                                    if(payment_request.network === 'undefined' || payment_request.currency === 'undefined' || payment_request.outputs === 'undefined')
+                                    if(typeof payment_request.network === 'undefined' || typeof payment_request.currency === 'undefined' || typeof payment_request.outputs === 'undefined')
                                     {
                                         return true;
                                     }
@@ -94,7 +95,7 @@ function decode_payment_url(url)
                                         return true;
                                     }
                                     
-                                    if(payment_request.requiredFeeRate !== 'undefined')
+                                    if(typeof payment_request.requiredFeeRate !== 'undefined')
                                     {
                                         if(payment_request.requiredFeeRate > 0)
                                         {
@@ -106,7 +107,7 @@ function decode_payment_url(url)
                                         }
                                     }
                                     
-                                    if(payment_request.outputs[0].amount === 'undefined' || payment_request.outputs[0].address === 'undefined')
+                                    if(typeof payment_request.outputs[0].amount === 'undefined' || typeof payment_request.outputs[0].address === 'undefined')
                                     {
                                         return true;
                                     }
@@ -117,7 +118,7 @@ function decode_payment_url(url)
                                         $('#btc-amount-input').val(payment_request.outputs[0].amount/100000000);
                                     }
    
-                                    if(payment_request.memo !== 'undefined')
+                                    if(typeof payment_request.memo !== 'undefined')
                                     {
                                         if(!payment_request.memo.includes("script"))
                                         {
@@ -312,7 +313,7 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
         return false;
     }
     
-    if(unspent_outputs === 'undefined')
+    if(typeof unspent_outputs === 'undefined')
     {
         selected_utxo = [];
         return false;
