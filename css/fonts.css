@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'HelveticaNeueCyr';
+    src: url('../fonts/HelveticaNeueCyr-Roman.eot');
+    src: local('../fonts/HelveticaNeueCyr-Roman'),
+        url('../fonts/HelveticaNeueCyr-Roman.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/HelveticaNeueCyr-Roman.woff2') format('woff2'),
+        url('../fonts/HelveticaNeueCyr-Roman.woff') format('woff'),
+        url('../fonts/HelveticaNeueCyr-Roman.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'HelveticaNeueCyr';
+    src: url('../fonts/HelveticaNeueCyr-Bold.eot');
+    src: local('../fonts/HelveticaNeueCyr-Bold'),
+        url('../fonts/HelveticaNeueCyr-Bold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/HelveticaNeueCyr-Bold.woff2') format('woff2'),
+        url('../fonts/HelveticaNeueCyr-Bold.woff') format('woff'),
+        url('../fonts/HelveticaNeueCyr-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: '../fonts/HelveticaNeueCyr';
+    src: url('../fonts/HelveticaNeueCyr-Black.eot');
+    src: local('../fonts/HelveticaNeueCyr-Black'),
+        url('../fonts/HelveticaNeueCyr-Black.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/HelveticaNeueCyr-Black.woff2') format('woff2'),
+        url('../fonts/HelveticaNeueCyr-Black.woff') format('woff'),
+        url('../fonts/HelveticaNeueCyr-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
