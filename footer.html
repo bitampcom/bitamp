@@ -1,0 +1,112 @@
+		<footer class="footer">
+			<div class="container">
+				<div class="footer__nav">
+					<div class="row">
+						<div class="col-lg-3 footer-mob__first">
+							<div class="footer__first">
+								<div class="footer__list-title">Network</div>
+								<ul class="footer__list def-list-zero">
+									<li class="footer__item">
+										<div class="footer__info footer__info--status" href="#"><span>Service Status</span></div>
+									</li>
+									<li class="footer__item">
+										<div class="footer__info" href="#">Blockchain Height <span id="info_height">Loading...</span></div>
+									</li>
+									<li class="footer__item">
+										<div class="footer__info" href="#">Mempool Size <span id="info_mempoolsize">Loading...</span></div>
+									</li>
+									<li class="footer__item">
+										<div class="footer__info" href="#">Difficulty <span id="info_difficulty">Loading...</span></div>
+									</li>
+									<li class="footer__item">
+										<div class="footer__info" href="#">Bitcoin Core <span id="info_version">Loading...</span></div>
+									</li>
+								</ul>
+                                <script>
+                                info_displayed = 1;
+                                if(Object.keys(info).length > 0)
+                                {
+                                    $("#info_height").html(info["height"]);
+                                    $("#info_mempoolsize").html(info["mempoolsize"]);
+                                    $("#info_difficulty").html(info["difficulty"]);
+                                    $("#info_version").html(info["version"]);
+                                }
+                                </script>
+							</div>
+						</div>
+						<div class="col-lg-3 footer-mob__second">
+							<div class="footer__second">
+								<div class="footer__list-title">Resources</div>
+								<ul class="footer__list def-list-zero">
+									<li class="footer__item">
+										<a class="footer__link" href="#/buy-bitcoin.html">Buy Bitcoin</a>
+									</li>
+                                    <li class="footer__item">
+										<a class="footer__link" href="#/spend-bitcoin.html">Spend Bitcoin</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/bitcoin-mining.html">Bitcoin Mining</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/crypto-exchanges.html">Crypto Exchanges</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/hardware-wallets.html">Hardware Wallets</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/block-explorers.html">Block Explorers</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="col-lg-3 footer-mob__third">
+							<div class="footer__third">
+								<div class="footer__list-title">Bitamp</div>
+								<ul class="footer__list def-list-zero">
+									<li class="footer__item">
+										<a class="footer__link" href="#/support.html">Support</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link footer__link--disabled">FAQ</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link footer__link--disabled">Blog</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/privacy-policy.html">Privacy</a>
+									</li>
+									<li class="footer__item">
+										<a class="footer__link" href="#/terms-of-use.html">Terms</a>
+									</li>
+									<li class="footer__item">
+										<div class="footer__info footer__info--version" href="#"><?php echo $app_version; ?></div>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="col-lg-3">
+							<div class="footer__last">
+								<div class="footer__logo"></div>
+								<div class="footer__text-after-logo">Bitamp is open-source and free for everyone. Your donations are greatly appreciated and help fund future development.</div>
+								<div class="footer__hash">3<strong>BitAmp</strong>DV58HHdLXXJfvK3cM6kuQGWH1LE</div>
+								<div class="footer__media">
+                                    <div style="background-color:#fff; padding: 5px;border-radius: 6px;">
+									<div class="footer__qr"></div>
+                                    </div>
+									<ul class="footer__social-list def-list-zero">
+										<li class="footer__social-item">
+											<a target="_blank" class="footer__social-link footer__social-link--twitter" href="https://twitter.com/bitampcom">Twitter</a>
+										</li>
+										<li class="footer__social-item">
+											<a class="footer__social-link footer__social-link--github" href="">GitHub</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<p class="footer__copyright">© Bitamp.com 2020 Released under the MIT license. Official Tor Address <a href="#">bitamptortcbtgit.onion</a> Bitamp is built using the latest technology and security practices available. Bitamp operations are preformed locally in your browser using javascript. Your seed and/or private key is never transmitted, stored or saved, leaving you in full control of your Bitcoin. You are fully responsible to keep your seed and/or private key safe. It is impossible for Bitamp to recover any lost seed or private key. Bitamp is an open-source project that can be independently verified by reviewing our source code on <a href="#">GitHub</a>.</p>
+			</div>
+		</footer>
+	</div>

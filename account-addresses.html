@@ -1,0 +1,577 @@
+<?php
+$page = "account-addresses";
+	require_once 'header-account.html';
+?>
+<script>
+page_name = "account-addresses";
+</script>
+<script>
+document.title = "Account Addresses - Bitamp";
+$("#header-top-title").text("Address List");
+$("#header-top-description").text("View each address associated with your account.");
+</script>
+	<main class="main def-page account">
+		<div class="container">
+			<div class="row">
+				<div class="account__block">
+					<div class="account__top-wrap">
+						<div class="account__block-title">Addresses list</div>
+                        <select id="address-type" style="margin-left: 5px;" onchange="update_addresses()">
+                        <option value="standard">standard (1xx)</option>
+                        <option value="segwit">segwit (bxx)</option>
+                        <option value="p2sh">p2sh (3xx)</option>
+                        </select>
+					</div>
+                    <script>
+                    function display_pkey(pubkey)
+                    {
+                        if($("#pkey_" + pubkey).is(':visible'))
+                        {
+                            $("#pkey_" + pubkey).text("");
+                            $("#pkey_" + pubkey).hide();
+                        }
+                        else
+                        {
+                            pkey = get_account_private_key(pubkey);
+                            $("#pkey_" + pubkey).text(pkey);
+                            $("#pkey_" + pubkey).show();
+                        }
+                    }
+                    
+                    
+                    function update_addresses()
+                    {
+                        $('#addresses-list').empty()
+                        $('#change-addresses-list').empty()
+                        
+                        if(account_single_private != '')
+                        {
+                            $('#change-address-main').hide();
+                        }
+                        
+                        var addresslist_select = document.getElementById('address-type');
+                        var selected = addresslist_select.options[addresslist_select.selectedIndex].value; 
+                        
+                        var addresseslist = document.getElementById('addresses-list');
+                        
+                        var element_1 = document.createElement("li");
+                        element_1.setAttribute('class', 'account__item');
+                        
+                        var element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Address";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Copy";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Balance";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Transactions";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Key";
+                        element_1.appendChild(element_1_1);
+                       
+                        
+                        addresseslist.appendChild(element_1);
+                        
+                        var finaladdresses = [];
+                        var finalbalances = [];
+                        var finaltransactions = [];
+                        
+                        if(selected == "standard")
+                        {
+                            if(account_single_private == "")
+                            {
+                                for (var i = 0; i < account_keys_legacy.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_legacy[i]["public"]] === 'undefined' || account_balances[account_keys_legacy[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_legacy[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_legacy[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_legacy[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_legacy[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_legacy[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_legacy[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_legacy[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                finaladdresses.push(account_single_public_standard);
+                                if(typeof account_balances[account_single_public_standard] === 'undefined')
+                                {
+                                   finalbalances.push(0); 
+                                }
+                                else
+                                {
+                                   finalbalances.push(account_balances[account_single_public_standard]);
+                                }
+                                
+                                if(typeof account_total_tx[account_single_public_standard] === 'undefined')
+                                {
+                                    finaltransactions.push(0);
+                                }
+                                else
+                                {
+                                    finaltransactions.push(account_total_tx[account_single_public_standard]);
+                                }
+                                
+                                
+                                finaladdresses.push(account_single_public_standard_compressed);
+                                if(typeof account_balances[account_single_public_standard_compressed] === 'undefined')
+                                {
+                                   finalbalances.push(0); 
+                                }
+                                else
+                                {
+                                   finalbalances.push(account_balances[account_single_public_standard_compressed]);
+                                }
+                                
+                                if(typeof account_total_tx[account_single_public_standard_compressed] === 'undefined')
+                                {
+                                    finaltransactions.push(0);
+                                }
+                                else
+                                {
+                                    finaltransactions.push(account_total_tx[account_single_public_standard_compressed]);
+                                }
+                            }
+                        }
+                        else if(selected == "segwit")
+                        {
+                            if(account_single_private == "")
+                            {
+                                for (var i = 0; i < account_keys_segwit.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_segwit[i]["public"]] === 'undefined' || account_balances[account_keys_segwit[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_segwit[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_segwit[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_segwit[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_segwit[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_segwit[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_segwit[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_segwit[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                finaladdresses.push(account_single_public_segwit);
+                                if(typeof account_balances[account_single_public_segwit] === 'undefined')
+                                {
+                                   finalbalances.push(0); 
+                                }
+                                else
+                                {
+                                   finalbalances.push(account_balances[account_single_public_segwit]);
+                                }
+                                
+                                if(typeof account_total_tx[account_single_public_segwit] === 'undefined')
+                                {
+                                    finaltransactions.push(0);
+                                }
+                                else
+                                {
+                                    finaltransactions.push(account_total_tx[account_single_public_segwit]);
+                                }
+                            }
+                        }
+                        else if(selected == "p2sh")
+                        {
+                            if(account_single_private == "")
+                            {
+                                for (var i = 0; i < account_keys_p2sh.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_p2sh[i]["public"]] === 'undefined' || account_balances[account_keys_p2sh[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_p2sh[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_p2sh[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_p2sh[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_p2sh[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_p2sh[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_p2sh[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_p2sh[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                finaladdresses.push(account_single_public_p2sh);
+                                if(typeof account_balances[account_single_public_p2sh] === 'undefined')
+                                {
+                                   finalbalances.push(0); 
+                                }
+                                else
+                                {
+                                   finalbalances.push(account_balances[account_single_public_p2sh]);
+                                }
+                                
+                                if(typeof account_total_tx[account_single_public_p2sh] === 'undefined')
+                                {
+                                    finaltransactions.push(0);
+                                }
+                                else
+                                {
+                                    finaltransactions.push(account_total_tx[account_single_public_p2sh]);
+                                }
+                            } 
+                        }
+                               
+                        for(var i = 0; i < finaladdresses.length; i++)
+                        {
+                            var element_1 = document.createElement("li");
+                            element_1.setAttribute('class', 'account__item');
+                            
+                            var element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; top:7px; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
+                            element_1.appendChild(element_1_1);
+                                                        
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "<span id=\"cpybtn-" + finaladdresses[i] + "\" class=\"copyready btn-copy\" onclick=\"copy_field('cpy_" + finaladdresses[i] + "')\"></span>";
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = finaltransactions[i];
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "<span class=\"btn-pkey\" onclick=\"display_pkey('" + finaladdresses[i] + "')\"></span>";
+                            element_1.appendChild(element_1_1);
+                            
+                            
+                            addresseslist.appendChild(element_1);
+                        }
+                        
+                        var element_1 = document.createElement("li");
+                        element_1.setAttribute('class', 'account__item');
+                        
+                        var element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Address";
+                        element_1.appendChild(element_1_1);
+                                                
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Copy";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Balance";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Transactions";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Key";
+                        element_1.appendChild(element_1_1);
+                        
+                        addresseslist.appendChild(element_1);
+                        
+                        if(account_single_private == '')
+                        {   
+                        
+                            var changeaddresseslist = document.getElementById('change-addresses-list');
+                            
+                            var element_1 = document.createElement("li");
+                            element_1.setAttribute('class', 'account__item');
+                            
+                            var element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "Address";
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "Copy";
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "Balance";
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "Transactions";
+                            element_1.appendChild(element_1_1);
+                            
+                            element_1_1 = document.createElement("div");
+                            element_1_1.setAttribute('class', 'account__item-col');
+                            element_1_1.innerHTML = "Key";
+                            element_1.appendChild(element_1_1);
+                           
+                            
+                            changeaddresseslist.appendChild(element_1);
+                      
+                            var finaladdresses = [];
+                            var finalbalances = [];
+                            var finaltransactions = [];
+                            
+                            if(selected == "standard")
+                            {
+                                for (var i = 0; i < account_keys_legacy_change.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_legacy_change[i]["public"]] === 'undefined' || account_balances[account_keys_legacy_change[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_legacy_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_legacy_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_legacy_change[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_legacy_change[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_legacy_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_legacy_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_legacy_change[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            else if(selected == "segwit")
+                            {
+                                for (var i = 0; i < account_keys_segwit_change.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_segwit_change[i]["public"]] === 'undefined' || account_balances[account_keys_segwit_change[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_segwit_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_segwit_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_segwit_change[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_segwit_change[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_segwit_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_segwit_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_segwit_change[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            else if(selected == "p2sh")
+                            {
+                                for (var i = 0; i < account_keys_p2sh_change.length; i++)
+                                {
+                                    if(typeof account_balances[account_keys_p2sh_change[i]["public"]] === 'undefined' || account_balances[account_keys_p2sh_change[i]["public"]] == 0)
+                                    {
+                                       finalbalances.push(0);
+                                       finaladdresses.push(account_keys_p2sh_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_p2sh_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.push(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.push(account_total_tx[account_keys_p2sh_change[i]["public"]]);
+                                       }
+                                    }
+                                    else
+                                    {
+                                       finalbalances.unshift(account_balances[account_keys_p2sh_change[i]["public"]]);
+                                       finaladdresses.unshift(account_keys_p2sh_change[i]["public"]);
+                                       
+                                       if(typeof account_total_tx[account_keys_p2sh_change[i]["public"]] === 'undefined')
+                                       {
+                                           finaltransactions.unshift(0);
+                                       }
+                                       else
+                                       {
+                                           finaltransactions.unshift(account_total_tx[account_keys_p2sh_change[i]["public"]]);
+                                       }
+                                    }
+                                }
+                            }
+                            
+                            for(var i = 0; i < finaladdresses.length; i++)
+                            {
+                                var element_1 = document.createElement("li");
+                                element_1.setAttribute('class', 'account__item');
+                                
+                                var element_1_1 = document.createElement("div");
+                                element_1_1.setAttribute('class', 'account__item-col');
+                                element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; top:7px; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
+                                element_1.appendChild(element_1_1);
+                                                            
+                                element_1_1 = document.createElement("div");
+                                element_1_1.setAttribute('class', 'account__item-col');
+                                element_1_1.innerHTML = "<span id=\"cpybtn-" + finaladdresses[i] + "\" class=\"copyready btn-copy\" onclick=\"copy_field('cpy_" + finaladdresses[i] + "')\"></span>";
+                                element_1.appendChild(element_1_1);
+                                
+                                
+                                element_1_1 = document.createElement("div");
+                                element_1_1.setAttribute('class', 'account__item-col');
+                                element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                                element_1.appendChild(element_1_1);
+                                
+                                element_1_1 = document.createElement("div");
+                                element_1_1.setAttribute('class', 'account__item-col');
+                                element_1_1.innerHTML = finaltransactions[i];
+                                element_1.appendChild(element_1_1);
+                                
+                                element_1_1 = document.createElement("div");
+                                element_1_1.setAttribute('class', 'account__item-col');
+                                element_1_1.innerHTML = "<span class=\"btn-pkey\" onclick=\"display_pkey('" + finaladdresses[i] + "')\"></span>";
+                                element_1.appendChild(element_1_1);
+
+                                changeaddresseslist.appendChild(element_1);
+                            } 
+
+                        
+                        var element_1 = document.createElement("li");
+                        element_1.setAttribute('class', 'account__item');
+                        
+                        var element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Address";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Copy";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Balance";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Transactions";
+                        element_1.appendChild(element_1_1);
+                        
+                        element_1_1 = document.createElement("div");
+                        element_1_1.setAttribute('class', 'account__item-col');
+                        element_1_1.innerHTML = "Key";
+                        element_1.appendChild(element_1_1);
+                        
+                        
+                        changeaddresseslist.appendChild(element_1);
+                       }
+                       
+                       update_cpy_btn();
+                    }
+                    update_addresses();
+                    </script>
+                    <h4>[Receiving addresses]</h4>
+					<ul id="addresses-list" class="account__list def-list-zero" style="margin-top: 20px;">
+					</ul>
+                    <h4 id="change-address-main" style="margin-top: 40px;">[Change addresses]</h4>
+					<ul id="change-addresses-list" class="account__list def-list-zero" style="margin-top: 20px;">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</main>
+<?php
+	require_once 'footer-account.html';
+?>

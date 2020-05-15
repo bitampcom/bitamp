@@ -1,0 +1,8 @@
+RewriteEngine on
+RewriteBase /
+
+RewriteCond %{HTTP_HOST} ^bitamp.com$ [NC]
+RewriteRule (.*) https://www.bitamp.com/$1 [R=301,L] 
+
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

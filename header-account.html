@@ -1,0 +1,415 @@
+<?php
+require_once("config.php");
+?>
+<script>
+btc_header_price = 1;
+
+if(account_session_id)
+{
+}
+else
+{
+    window.location.href = '/';
+}
+
+function copy_field(e)
+{
+    var textarea = document.createElement('textarea')
+    textarea.id = 'temp_text_area_element'
+    textarea.style.height = 0
+    document.body.appendChild(textarea)
+    textarea.value = document.getElementById(e).innerText;
+    var copyfield = document.querySelector('#temp_text_area_element')
+    copyfield.select();
+    copyfield.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+
+function copy_input(e)
+{
+    var textarea = document.createElement('textarea')
+    textarea.id = 'temp_text_area_element'
+    textarea.style.height = 0
+    document.body.appendChild(textarea)
+    textarea.value = document.getElementById(e).value;
+    var copyfield = document.querySelector('#temp_text_area_element')
+    copyfield.select();
+    copyfield.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+
+function force_update_balance()
+{
+    var full_account_balance = 0;
+    for(var ab in account_balances)
+    {
+        full_account_balance += account_balances[ab];
+    }
+
+    if(cached_final_balance != -1)
+    {
+        full_account_balance = (cached_final_balance * 100000000).toString();
+    }
+    
+    if(balance_modifier != 0)
+    {
+        full_account_balance += (balance_modifier * 100000000);
+    }
+  
+    if(btc_header_price == 1)
+    {
+          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
+          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          $("#usdbalance").html(selected_currency_left[selected_currency] + usd_balance_amount.toString());
+    }
+}               
+</script>
+<div class="wrapper">
+		<div class="header-mob">
+			<div class="container">
+				<div class="header-mob__content row">
+					<div class="header__logo">
+						<a class="logo" href="#/account.html">
+							<img src="img/logo.svg" alt="Bitamp" width="130" height="29">
+						</a>
+					</div>
+					<button class="header-mob__btn active"><span></span></button>
+				</div>
+			</div>
+		</div>
+		<header class="header">
+			<div class="container">
+				<div class="header__content row">
+					<div class="header__logo">
+						<a class="logo" href="#/account.html">
+							<img src="img/logo.svg" alt="Bitamp" width="130" height="29">
+						</a>
+					</div>
+					<div class="header__info">
+						<div class="header-mob__lang">
+							<div class="header__lang-switch switch">
+								<span class="current-lang current-switch">English</span>
+								<ul class="lang__list switch__list" style="overflow: hidden;">
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option active" href="#">English</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Portugues</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Francias</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">漢語</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Deutch</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">日本語</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Русский</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Korean</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Espanol</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Arabic</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Italiano</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Hindi</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="header__rate">1 BTC = <span id="btc-usd-price" class="current-rate">$0</span></div>
+                        <script>
+                        
+                        function get_cached_balance()
+                        {
+                            if(account_session_id)
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/get_cached_balance.php',
+                                    data: {
+                                       session_id: account_session_id
+                                    }
+                                }).done(function(cached_balance){
+                                        if(cached_balance != -1)
+                                        {
+                                           cached_final_balance = parseFloat(cached_balance);
+                                        }
+                                        loaded_settings_bal = 1;
+                                        force_update_balance();
+                                        $('#balloading').hide();
+                                        $('#baldisplay').show();
+                                        
+                                }).fail(function()
+                                {
+                                    setTimeout(get_cached_balance, 1000);
+                                });
+                            }
+                        }
+                        
+                        if(updating_cached_balance == 0)
+                        {
+                            updating_cached_balance = 1;
+                            get_cached_balance();
+                        }
+                        
+                        function update_prices()
+                        {
+                        
+                            $.ajax({
+                                type: "POST",
+                                url: '/get_prices.php',
+                            }).done(function(price_list){
+
+                                    prices = price_list;
+                                    if(btc_header_price == 1 && Object.keys(prices).length > 0)
+                                    {
+                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                        
+                                        if(page_name == "account-receive" || page_name == "account-send")
+                                        {
+                                            verifybtcamount();
+                                        }
+                                    }
+                                    setTimeout(update_prices, 30000);
+                            }).fail(function()
+                            {
+                                setTimeout(update_prices, 1000);
+                            });
+             
+                        }
+
+                        if(updating_prices == 0)
+                        {   
+                            updating_prices = 1;
+                            update_prices();
+                        }
+                        else
+                        {
+                            if(btc_header_price == 1 && Object.keys(prices).length > 0)
+                            {
+                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                
+                                if(page_name == "account-receive" || page_name == "account-send")
+                                {
+                                    verifybtcamount();
+                                }
+                            }
+                        }
+                      
+                        function update_info()
+                        {
+                        
+                            $.ajax({
+                                type: "POST",
+                                url: '/get_info.php',
+                            }).done(function(info_list){
+
+                                    info = info_list;
+                                    temp_block_height = parseInt(info["height"].replace(/,/g, ""));
+                                    if(temp_block_height != block_height)
+                                    {   
+                                        unspent_updated = 0;
+                                        block_height = parseInt(info["height"].replace(/,/g, ""));                                    
+                                        if(page_name == "account")
+                                        {
+                                            if(contains_unconfirmed == 1)
+                                            {
+                                                contains_unconfirmed = 0;
+                                                update_transactions();
+                                            }
+                                            else
+                                            {
+                                                display_transactions();
+                                            }
+                                        }
+                                    }
+                                    if(info_displayed == 1 && Object.keys(info).length > 0)
+                                    {
+                                        $("#info_height").html(info["height"]);
+                                        $("#info_mempoolsize").html(info["mempoolsize"]);
+                                        $("#info_difficulty").html(info["difficulty"]);
+                                        $("#info_version").html(info["version"]);
+                                    }
+                                    setTimeout(update_info, 10000);
+                            }).fail(function()
+                            {
+                                setTimeout(update_info, 1000);
+                            });
+             
+                        }
+                        if(updating_info == 0)
+                        {   
+                            updating_info = 1;
+                            update_info();
+                        }
+                        </script>
+						<div class="header__currency-switch switch">
+							<span id="selected_currency_text" class="current-currency current-switch"></span>
+							<ul class="currency__list switch__list" style="overflow: hidden;">
+								<li class="currency__item switch__item">
+									<a id="select_USD" class="currency__option switch__option" href="#">USD</a>
+								</li>
+								<li class="currency__item switch__item">
+									<a id="select_EUR" class="currency__option switch__option" href="#">EUR</a>
+								</li>
+								<li class="currency__item switch__item">
+									<a id="select_GBP" class="currency__option switch__option" href="#">GBP</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_CAD" class="currency__option switch__option" href="#">CAD</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_AUD" class="currency__option switch__option" href="#">AUD</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_CNY" class="currency__option switch__option" href="#">CNY</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_KRW" class="currency__option switch__option" href="#">KRW</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_RUB" class="currency__option switch__option" href="#">RUB</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="header__btns">
+						<a id="logout" class="header__btn header__btn--logout" href="/"><span>Logout</span></a>
+                        <script>
+                        $("#logout").click(function(e)
+                        {
+                            e.preventDefault();
+                            var url = "logout.php";
+
+                            $.ajax({
+                                   type: "POST",
+                                   url: url,
+                                   data: {
+                                    session_id: account_session_id
+                                   }
+                                 });  
+                            window.location.href = '/';
+                        });
+                        </script>
+					</div>
+				</div>
+			</div>
+		</header>
+		<div class="header-mob__overlay"></div>
+		<div class="account-header">
+			<div class="container">
+				<div class="account-header__info row">
+					<div class="account-header__col account-header__mob-col">
+						<h1 id="header-top-title" class="account-header__position"></h1>
+						<p id="header-top-description" class="account-header__description"></p>
+					</div>
+                    <div id="balloading" style="text-align: center; font-size: 11px; margin-left: auto; display: none;"><img width="64px" height="64px" src="img/loading-button.svg"></div>  
+					<div id="baldisplay" class="account-header__col" style="display: none;">
+						<div class="account-header__wallet account-header__wallet--btc">
+							<ul class="account-header__wallet-list def-list-zero">
+								<li class="account-header__wallet-item">
+									<div id="btcbalance" class="account-header__balance">...</div>
+									<div class="account-header__currency">BTC Balance</div>
+								</li>
+								<li class="account-header__wallet-item">
+									<div id="usdbalance" class="account-header__balance">$0</div>
+									<div id="usdtext_bal" class="account-header__currency"></div>
+								</li>
+                                <script>
+                                $("#usdtext_bal").text(selected_currency + " Balance");
+                                if(account_session_id)
+                                {
+                                    var full_account_balance = 0;
+                                    for(var i in account_balances)
+                                    {
+                                        full_account_balance += account_balances[i];
+                                    } 
+                                                              
+                                    if(cached_final_balance != -1)
+                                    {
+                                        full_account_balance = (cached_final_balance * 100000000).toString();
+                                    }
+                              
+                                    if(balance_modifier != 0)
+                                    {
+                                        full_account_balance += (balance_modifier * 100000000);
+                                    }
+                                    
+                                    if(btc_header_price == 1)
+                                    {
+                                          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
+                                          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                          $("#usdbalance").html(selected_currency_left[selected_currency] + usd_balance_amount.toString());
+                                    }
+                                }
+                                </script>
+							</ul>
+						</div>
+					</div>
+                    <script>
+                    if(loaded_settings_bal == 0)
+                    {
+                        $('#baldisplay').hide();
+                        $('#balloading').show();
+                    }
+                    else
+                    {
+                        $('#balloading').hide();
+                        $('#baldisplay').show();
+                    }
+                    </script>
+				</div>
+				<div class="account-mob-header__wrap-nav row">
+					<div class="account-header__nav account-mob-header__nav">
+						<div class="account-header__col">
+							<ul class="account-header__nav-list def-list-zero">
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account"){ echo " active"; } ?>" href="#/account.html">Overview</a>
+								</li>
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account-send"){ echo " active"; } ?>" href="#/account-send.html">Send</a>
+								</li>
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account-receive"){ echo " active"; } ?>" href="#/account-receive.html">Receive</a>
+								</li>
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account-addresses"){ echo " active"; } ?>" href="#/account-addresses.html">Addresses</a>
+								</li>
+								<li class="account-header__nav-item in-development">
+									<a class="account-header__nav-link" href="#">Lightning</a>
+								</li>
+                                <li class="account-header__nav-item in-development">
+									<a class="account-header__nav-link" href="#">Exchange</a>
+								</li>
+							</ul>
+						</div>
+						<div class="account-header__col">
+							<ul class="account-header__nav-list def-list-zero">
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account-info"){ echo " active"; } ?>" href="#/account-info.html">Account</a>
+								</li>
+								<li class="account-header__nav-item">
+									<a class="account-header__nav-link<?php if($page == "account-support"){ echo " active"; } ?>" href="#/account-support.html">Support</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<button class="account-header__btn-arrow"></button>
+				</div>
+			</div>
+		</div>

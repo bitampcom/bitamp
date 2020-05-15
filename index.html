@@ -1,0 +1,267 @@
+<?php
+header("strict-transport-security: max-age=600");
+header('X-Frame-Options: SAMEORIGIN');
+header("X-XSS-Protection: 1; mode=block");
+header('X-Content-Type-Options: nosniff');
+header("X-Content-Security-Policy: allow 'self'");
+header("Referrer-Policy: same-origin");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/roboto.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/fonts.css">
+	<title>Bitcoin Wallet - Send and Receive Bitcoin Instantly using Bitamp | Bitamp.com</title> 
+    <meta name="description" content="Easy to use, client-side, open-source Bitcoin wallet to send and receive BTC from anywhere, on any device.">
+    <script>
+    window.onpopstate = function(e){
+        if(e.state)
+        {
+            document.getElementById("content").innerHTML = e.state.html;
+            document.title = e.state.pageTitle;
+        }
+    };
+    function website_process(response, url_path){
+        document.getElementById("content").innerHTML = response.html;
+        document.title = response.pageTitle;
+        window.history.pushState({"html":response.html,"pageTitle":response.pageTitle},"", url_path);
+    }
+    </script>
+</head>
+<body class="bg-cyan">
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.arcticmodal.min.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/main.js"></script>
+<div id="loading-page" style="display: none;"></div>
+<div id="content">
+
+</div>
+<script>
+var account_type = "unknown";
+var seed_type = "unknown";
+
+var account_session_id = null;
+var temp_account_session_id = '';
+
+var account_keys_new = [];
+var account_updating_account_keys = 0;
+var account_updating_account_keys_initial = 0;
+
+var account_keys_legacy = [];
+var account_keys_segwit = [];
+var account_keys_p2sh = [];
+
+var account_keys_legacy_change = [];
+var account_keys_segwit_change = [];
+var account_keys_p2sh_change = [];
+
+var total_bip39_accounts = 0;
+
+var account_single_private = '';
+var account_single_private_compressed = '';
+var account_single_public_standard = '';
+var account_single_public_standard_compressed = '';
+var account_single_public_segwit = '';
+var account_single_public_p2sh = '';
+
+var account_added_address = 0;
+var skip_matching_txcount = 0;
+
+var account_seed = '';
+var total_checked_txcount = 10;
+var cached_final_balance = 0;
+var updating_cached_balance = 0;
+
+var contains_unconfirmed = 0;
+
+var loaded_settings_tx = 0;
+var loaded_settings_bal = 0;
+
+var account_balances = [];
+var account_ids = [];
+var account_total_tx = [];
+var account_bip39_number = [];
+var account_address_type = []; //0=standard,1=segwit,2=p2sh, 3=standard_change, 4=segwit_change, 5=p2sh_change
+var account_updating_balance = 0;
+var full_account_balance = 0;
+
+var mainpopup_shown = 0;
+
+var block_height = 0;
+
+var balance_modifier = 0;
+
+var prices = {};
+var info = {};
+var info_displayed = 0;
+var prices_last_update = 0;
+var btc_header_price = 0;
+var updating_prices = 0;
+
+var donation_address = "3BitAmpDV58HHdLXXJfvK3cM6kuQGWH1LE";
+
+var reserved_data_PBKDF2_ROUNDS = null;
+var reserved_data_final_mnemonic = null;
+var reserved_data_final_passphrase = null;
+var reserved_data_final_passphrase_bip39 = null;
+
+var reserved_data_seed_output = null;
+var reserved_data_seed_output_bip39 = null;
+
+var reserved_data_root = null;
+var reserved_data_root_bip39 = null;
+        
+var updating_info = 0;
+
+//type: 1(sent), 0(received)
+//date
+//from_addr (array)
+//to_addr (array)
+//block_height
+//value
+var account_transactions = [];
+
+var account_updating_transactions = 0;
+var account_updating_txcount = 0;
+var account_updating_addr_txcount = 0;
+var account_transaction_page = 0;
+var account_transaction_page_table = 0;
+var account_txcount = 0;
+var account_addr_txcount = 0;
+
+var page_name = '';
+
+var current_date = new Date();
+
+var account_timeout = new Date().getTime();
+
+var last_page_timeload = 0;
+var last_page_timeloadx = 0;
+
+var selected_currency = "USD";
+
+var selected_currency_left = {"USD":"$", "EUR":"€", "GBP":"£", "CAD":"$", "AUD":"$", "CNY":"¥", "KRW":"₩", "RUB":"₽"};
+
+var unspent_updated = 1;
+var estimated_fee = 0;
+var account_updating_unspent = 0;
+var unspent_outputs = [];
+
+setInterval(function()
+{
+    if(account_session_id != null)
+    {
+        var time_timeout = new Date().getTime();
+        if(time_timeout >= account_timeout + 3600000)
+        {
+            window.location.href = "/";
+        }   
+    }
+}, 1000);
+
+var old_page_hash = '';
+var page_hash = location.hash;
+
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+if (!requestAnimationFrame) {
+	requestAnimationFrame = function(callback) {
+		setTimeout(callback, 1000 / 60);
+	}
+}
+
+function check_last_page_timeload(x)
+{
+    if(x == last_page_timeload)
+    {
+        $('#loading-page').show();
+    }
+}
+
+function check_timeout()
+{
+    
+}
+
+function load_page()
+{
+    btc_header_price = 0;
+    info_displayed = 0;
+    account_timeout = new Date().getTime();
+    last_page_timeload++;
+    last_page_timeloadx = last_page_timeload;
+    setTimeout(check_last_page_timeload.bind(null, last_page_timeloadx), 2000);
+    page_name = '';
+    old_page_hash = page_hash;
+    page_hash = location.hash;
+    var url_parts = page_hash.slice(1).split('?');
+    if(!url_parts)
+    {
+        window.location.hash = old_page_hash;
+        page_hash = old_page_hash;
+        last_page_timeload++;
+        $('#loading-page').hide();
+        return;
+    }
+    if(url_parts[0] == '' || url_parts[0] == '/index.html' || url_parts[0] == 'index.html')
+    {   
+        window.location.hash = old_page_hash;
+        page_hash = old_page_hash;
+        last_page_timeload++;
+        $('#loading-page').hide();
+        return;
+    }
+    $.ajax({
+        type: "POST",
+        url: page_hash.slice(1),
+        data: {
+          session_id: account_session_id,
+        }
+    }).done(function(response){
+        $('#content').html(response);
+        update_page();
+        last_page_timeload++;
+        $('#loading-page').hide();
+    }).fail(function(){ 
+        if(old_page_hash != page_hash)
+        {
+            window.location.hash = old_page_hash;
+            page_hash = old_page_hash;
+        }
+        else
+        {
+            window.location.hash = "#/login.html";
+            page_hash = location.hash;
+        }
+        
+        last_page_timeload++;
+        $('#loading-page').hide();
+    });
+}
+
+$(window).on('hashchange',function(){
+    load_page();
+});
+
+$(document).ready(function()
+{
+if(!window.location.hash || window.location.hash == '#' || window.location.hash == '#/' || window.location.hash == "#/index.html")
+{
+    window.location.hash = "#/login.html";
+    page_hash = location.hash;
+}
+else
+{
+    load_page();
+}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<?php
+require_once("config.php");
+?>
+<script>
+btc_header_price = 1;
+
+function copy_field(e)
+{
+    var textarea = document.createElement('textarea')
+    textarea.id = 'temp_text_area_element'
+    textarea.style.height = 0
+    document.body.appendChild(textarea)
+    textarea.value = document.getElementById(e).innerText;
+    var copyfield = document.querySelector('#temp_text_area_element')
+    copyfield.select();
+    copyfield.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+
+function copy_input(e)
+{
+    var textarea = document.createElement('textarea')
+    textarea.id = 'temp_text_area_element'
+    textarea.style.height = 0
+    document.body.appendChild(textarea)
+    textarea.value = document.getElementById(e).value;
+    var copyfield = document.querySelector('#temp_text_area_element')
+    copyfield.select();
+    copyfield.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+</script>
+<div class="wrapper">
+		<div class="header-mob">
+			<div class="container">
+				<div class="header-mob__content row">
+					<div class="header__logo">
+						<a class="logo" href="#">
+							<img src="img/logo.svg" alt="Bitamp" width="130" height="29">
+						</a>
+					</div>
+					<button class="header-mob__btn active"><span></span></button>
+				</div>
+			</div>
+		</div>
+		<header class="header">
+			<div class="container">
+				<div class="header__content row">
+					<div class="header__logo">
+						<a class="logo" href="#/login.html">
+							<img src="img/logo.svg" alt="Bitamp" width="130" height="29">
+						</a>
+					</div>
+					<div class="header__info">
+						<div class="header-mob__lang">
+							<div class="header__lang-switch switch">
+								<span class="current-lang current-switch">English</span>
+								<ul class="lang__list switch__list" style="overflow: hidden;">
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option active" href="#">English</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Français</a>
+									</li>
+                                    <li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Deutsch</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Русский</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Español</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Italiano</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">Português</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">中文</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">日本語</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">한국어</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">العربية</a>
+									</li>
+									<li class="lang__item switch__item">
+										<a class="lang__option switch__option_disabled" href="#">हिन्दी</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="header__rate">1 BTC = <span id="btc-usd-price" class="current-rate">$0</span></div>
+                        <script>
+                        function update_prices()
+                        {
+                        
+                            $.ajax({
+                                type: "POST",
+                                url: '/get_prices.php',
+                            }).done(function(price_list){
+
+                                    prices = price_list;
+                                    if(btc_header_price == 1 && Object.keys(prices).length > 0)
+                                    {
+                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                    }
+                                    setTimeout(update_prices, 30000);
+                            }).fail(function()
+                            {
+                                setTimeout(update_prices, 1000);
+                            });
+             
+                        }
+                        if(updating_prices == 0)
+                        {   
+                            updating_prices = 1;
+                            update_prices();
+                        }
+                        else
+                        {
+                            if(btc_header_price == 1 && Object.keys(prices).length > 0)
+                            {
+                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                            }
+                        }
+                     
+                        function update_info()
+                        {
+                        
+                            $.ajax({
+                                type: "POST",
+                                url: '/get_info.php',
+                            }).done(function(info_list){
+
+                                    info = info_list;
+                                    block_height = parseInt(info["height"].replace(/,/g, ""));
+                                    if(info_displayed == 1 && Object.keys(info).length > 0)
+                                    {
+                                        $("#info_height").html(info["height"]);
+                                        $("#info_mempoolsize").html(info["mempoolsize"]);
+                                        $("#info_difficulty").html(info["difficulty"]);
+                                        $("#info_version").html(info["version"]);
+                                    }
+                                    setTimeout(update_info, 10000);
+                            }).fail(function()
+                            {
+                                setTimeout(update_info, 1000);
+                            });
+             
+                        }
+                        if(updating_info == 0)
+                        {   
+                            updating_info = 1;
+                            update_info();
+                        }
+                        </script>
+						<div class="header__currency-switch switch">
+							<span id="selected_currency_text" class="current-currency current-switch"></span>
+							<ul class="currency__list switch__list" style="overflow: hidden;">
+								<li class="currency__item switch__item">
+									<a id="select_USD" class="currency__option switch__option" href="#">USD</a>
+								</li>
+								<li class="currency__item switch__item">
+									<a id="select_EUR" class="currency__option switch__option" href="#">EUR</a>
+								</li>
+								<li class="currency__item switch__item">
+									<a id="select_GBP" class="currency__option switch__option" href="#">GBP</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_CAD" class="currency__option switch__option" href="#">CAD</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_AUD" class="currency__option switch__option" href="#">AUD</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_CNY" class="currency__option switch__option" href="#">CNY</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_KRW" class="currency__option switch__option" href="#">KRW</a>
+								</li>
+                                <li class="currency__item switch__item">
+									<a id="select_RUB" class="currency__option switch__option" href="#">RUB</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="header__btns">
+						<a id="header-btn-login" class="header__btn" href="#/login.html">Login</a>
+						<a id="header-btn-new-wallet" class="header__btn header__btn--active" href="#/create.html" onclick="app_gen_seed();">Create Account</a>
+					</div>
+				</div>
+			</div>
+		</header>
+		<div class="header-mob__overlay"></div>

@@ -1,0 +1,247 @@
+<?php
+$page = "create";
+?>
+<script>
+document.title = "Create Account - Generate New Seed - Bitamp";
+</script>
+<div id="print-display" style="display: none;">
+  <img src="img/logo.png" alt="Bitamp" style="position: relative; display: block; margin: auto;">
+  <p readonly="" id="print-display-seed" style="color: #53658c; border-color: #c3cbe7; background-color: #eff0f3; padding: 35px; font-size: 22px; font-family: Arial, Helvetica, sans-serif;"></p>
+    <ul style="color: #000">
+        <li>This is a <strong>BIP39</strong> seed.</li>
+        <li>Store your printed seed in a safe & secure place.</li>
+        <li>Seeds are not stored on our servers, they cannot be recovered if lost.</li>
+        <li>Login with your seed by going to <strong>www.bitamp.com</strong></li>
+    </ul>
+</div>
+<?php
+	require_once 'header.html';
+?>
+		<main class="main def-page home bg-cube active-tab-create-wallet">
+			<div class="container">
+				<div class="row">
+					<div class="home__first col-lg-8 offset-lg-2">
+						<div class="def-page__title-wrap">
+							<ul class="home__title-tabs def-list-zero">
+								<li class="home__title-tab">
+									<h1 class="home__title def-page__title">Bitamp Bitcoin Wallet</h1>
+									<h2 class="home__subtitle">Easy to use, client-side, open-source Bitcoin wallet to send and receive BTC from anywhere, on any device.</h2>
+								</li>
+								<li class="home__title-tab">
+									<h1 class="home__title def-page__title">Create New Wallet</h1>
+									<h2 class="home__subtitle">Your account is ready! Save and enter your 12 word seed in the box below to enter your account.</h2>
+								</li>
+							</ul>
+						</div>
+						<div class="home__forms">
+							<ul class="home__nav-tabs def-list-zero">
+								<li class="home__nav-item">
+									<button class="home__nav-btn">
+										<span class="home__nav-btn--login">Login</span>
+									</button>
+								</li>
+								<li class="home__nav-item">
+									<button class="home__nav-btn" onclick="app_gen_seed();">
+										<span class="home__nav-btn--new-wallet">New Wallet</span>
+									</button>
+								</li>
+							</ul>
+							<ul class="home__form-tabs def-list-zero">
+								<li class="home__form-tab">
+									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin()">
+                                        <div id="use-seed-key" style="display: none; padding-bottom: 25px;">
+                                         <span style="text-decoration: underline; color: #57a8f1; cursor: pointer;">use a seed instead</span>
+										</div>
+										<div class="form__label form__label--your-seed">
+											<div class="form__nav-options-wrap form__nav-options-wrap--checkbox">
+												<label class="form__label-text" for="login-your-seed">Your Seed:</label>
+											</div>
+											<textarea class="form__textarea" id="login-your-seed" name="login-your-seed" placeholder="Enter your Seed here"></textarea>
+										</div>
+                                        <div id="use-private-key" style="display: none; padding-bottom: 25px;">
+                                         <span style="text-decoration: underline; color: #57a8f1; cursor: pointer;">use a private key instead</span>
+										</div>
+                                        <div class="form__label form__label--private-key">
+											<div class="form__nav-options-wrap form__nav-options-wrap--checkbox">
+												<label class="form__label-text" for="login-private-key">Your Private Key:</label>
+											</div>
+											<input class="form__text-input" id="login-private-key" type="text" name="login-private-key" placeholder="Enter your Private Key here" oninput="bitamp_pkey_checkbip38()">
+										</div>
+										<div class="form__label form__label--private-key-password hide">
+											<div class="form__nav-options-wrap form__nav-options-wrap--checkbox">
+												<label class="form__label-text" for="login-private-key">Enter your Private Key password:</label>
+											</div>
+											<span class="form__label-text"></span>
+											<input class="form__text-input" id="password-private-key" type="text" name="password-private-key" placeholder="Enter your Private Key here">
+										</div>
+										<div class="form__wrap-btns">
+											<input id="user-reset-btn" class="form__btn-reset btn-reset" type="reset" value="CLEAR">
+											<button id="login-btn" class="btn-active">Login to your account</button>
+										</div>
+									</form>
+								</li>
+								<li class="home__form-tab">
+									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin_create()">
+										<div class="form__label wrap-for-copy-print form__label--mob-for-generate">
+											<div class="form__nav-options-wrap">
+												<label class="form__label-text" for="create-wallet-your-seed">Your Seed:</label>
+												<div class="form__nav-options">
+													<span id="gen_seed_text" class="form__option form__option--generate" onclick="app_gen_seed();">Generate New Seed</span>
+												</div>
+											</div>
+											
+											<textarea class="form__textarea" id="create-wallet-your-seed" name="create-wallet-your-seed" style="color: #404755; border-color: #d8dbe5; background-color: #f4f4f7;" readonly></textarea>
+                                            <script>
+                                                var generating_seed = false;
+                                                function app_gen_seed_callback(seed)
+                                                {
+                                                    document.getElementById("gen_seed_text").innerHTML = "Generate New Seed";
+                                                    document.getElementById("gen_seed_text").onclick = function(){ app_gen_seed(); };
+                                                    document.getElementById("create-wallet-your-seed").disabled = false;
+                                                    generating_seed = false;
+                                                    if(seed != "")
+                                                    {
+                                                        document.getElementById("create-wallet-your-seed").innerHTML = seed;
+                                                        document.getElementById("copy-seed-btn").onclick = function(){ app_seed_copy(); };
+                                                        $("#copy-seed-btn").addClass("copyready");
+                                                        $("#print-display-seed").text(seed);
+                                                        // mnemonic_to_seed(seed);
+                                                    }
+                                                    create_stop_loading();
+                                                }
+                                                function app_gen_seed()
+                                                {
+                                                    document.getElementById("create-wallet-confirm-your-seed").value = "";
+                                                    if(generating_seed == false)
+                                                    {
+                                                        generating_seed = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        return false;
+                                                    }
+                                                    $("#copy-seed-btn").removeClass("copyready");
+                                                    document.getElementById("create-wallet-your-seed").disabled = true;
+                                                    document.getElementById("gen_seed_text").onclick = null;
+                                                    document.getElementById("copy-seed-btn").onclick = null;
+                                                    var elem = document.getElementById("create-wallet-your-seed");
+                                                    document.getElementById("gen_seed_text").innerHTML = "Please wait...";
+                                                    if(seed_generate(elem, app_gen_seed_callback) == false)
+                                                    {
+                                                        app_gen_seed_callback("");
+                                                    }
+                                                    return true;
+                                                }
+                                                function app_seed_copy()
+                                                {
+                                                    var copyseed = document.getElementById("create-wallet-your-seed");
+                                                    copyseed.select();
+                                                    copyseed.setSelectionRange(0, 99999);
+                                                    document.execCommand("copy");
+                                                }
+                                            app_gen_seed();
+                                            </script>
+											<span id="copy-seed-btn" class="btn-copy" onclick="app_seed_copy();"></span>
+											<span class="btn-print" onclick="window.print();"></span>
+										</div>
+										<label id="seedentrylabel" class="form__label">
+											<span class="form__label-text">Seed Confirmation:</span>
+											<textarea class="form__textarea" id="create-wallet-confirm-your-seed" name="create-wallet-confirm-your-seed" placeholder="Type your Seed here to confirm it"></textarea>
+											<span class="error__message" style="display: none;">Incorrect seed confirmation. Please, write down the seed exactly as shown.</span>
+										</label>
+										<button id="create-btn" class="home__form-btn btn-active">I’ve written down my seed, log me in</button>
+										<div class="error__notification" style="display: none;">
+											<span class="error__notification-message">Incorrect seed confirmation. Please, write down the seed exactly as shown.</span>
+											<span class="error__notification-close"></span>
+										</div>
+									</form>
+								</li>
+							</ul>
+							
+						</div>
+					</div><!-- END home__first -->
+					<div class="col-12">
+						<ul class="home__info-tabs def-list-zero">
+							<li class="home__info-tab">
+								<ul class="advantages__list def-list-zero">
+									<li class="advantage__item">Secure</li>
+									<li class="advantage__item">Anonymous</li>
+									<li class="advantage__item">Instant</li>
+									<li class="advantage__item">Worldwide</li>
+									<li class="advantage__item">Control</li>
+								</ul>
+								<ul class="advantage-more__list def-list-zero">
+									<li class="advantage-more__item">
+										<div class="advantage-more__col">
+											<img src="img/advantage-secure.svg" alt="Secure" width="420" height="420">
+										</div>
+										<div class="advantage-more__col">
+											<p class="advantage-more__title">Secure</p>
+											<p class="advantage-more__subtitle">Bitamp is an open-source, client-side, free Bitcoin wallet which allows you to send and receive Bitcoin securely on the blockchain.</p>
+											<p class="def-p">Remember to always verify your SSL connection before logging in. Look for the padlock to the left of bitamp.com in your browser.</p>
+										</div>
+									</li>
+									<li class="advantage-more__item">
+										<div class="advantage-more__col">
+											<p class="advantage-more__title">Anonymous</p>
+											<p class="advantage-more__subtitle">Your anonymity is important to us. Bitamp doesn't store your seed, private key, ip address or browser details.</p>
+											<p class="def-p">No email address or personal information is needed to use our service. Feel free to access your account from home, VPN or TOR.</p>
+										</div>
+										<div class="advantage-more__col">
+											<img src="img/advantage-anonymous.svg" alt="Anonymous" width="420" height="420">
+										</div>
+									</li>
+									<li class="advantage-more__item">
+										<div class="advantage-more__col">
+											<img src="img/advantage-instant.svg" alt="Instant" width="420" height="420">
+										</div>
+										<div class="advantage-more__col">
+											<p class="advantage-more__title">Instant</p>
+											<p class="advantage-more__subtitle">Directly connect to the Bitcoin blockchain in your browser with Bitamp.</p>
+											<p class="def-p">Transactions are sent instantly at your command. Once broadcast, the blockchain typically takes 10 minutes to confirm your transfer. With normal banks, transfers can take several days or weeks.</p>
+										</div>
+									</li>
+									<li class="advantage-more__item">
+										<div class="advantage-more__col">
+											<p class="advantage-more__title">Worldwide</p>
+											<p class="advantage-more__subtitle">Bitcoin doesn't have borders. You can send money to any recipient globally without any restrictions.</p>
+											<p class="def-p">Bitcoin transactions only cost you pennies, its not a mystery why Bitcoin is used by millions of people to transfer money worldwide.</p>
+										</div>
+										<div class="advantage-more__col">
+											<img src="img/advantage-worldwide.svg" alt="Worldwide" width="420" height="420">
+										</div>
+									</li>
+									<li class="advantage-more__item">
+										<div class="advantage-more__col">
+											<img src="img/advantage-control.svg" alt="Control" width="420" height="420">
+										</div>
+										<div class="advantage-more__col">
+											<p class="advantage-more__title">Control</p>
+											<p class="advantage-more__subtitle">Your Keys, Your Bitcoin. These are words to live by. Not having access to your private key or seed puts you at risk to lose your Bitcoin.</p>
+											<p class="def-p">Again and again crypto exchanges and custodial wallets have been hacked, dissolved or become insolvent; leaving their members with empty wallets. Don't fall victim, take control of your Bitcoin and your financial independence.</p>
+										</div>
+									</li>
+								</ul>
+							</li>
+							<li class="home__info-tab">
+								<ul class="recommendations-list def-list-zero">
+									<li class="recommendation-item recommendation-item--save">
+										<p class="recommendation-title">You must save your Seed</p>
+										<p class="def-p">In the box above you will find your "Seed" of twelve words in specific order. This information is private and must be kept secure. This is the only way to access your Bitcoin/Bitamp wallet. We never store your "Seed" on our servers and if lost, recovery is not possible. If stolen, you must move your funds to a new account immediately with a newly generated "Seed". Ensure the safety of your "Seed" by writing it down on a piece of paper, laminating it and storing it in a secure place or saving it to an encrypted file on a USB stick.</p>
+									</li>
+									<li class="recommendation-item recommendation-item--mindful">
+										<p class="recommendation-title">Be mindful using Bitamp</p>
+										<p class="def-p">Bitamp is a web based wallet permitting you to access your Bitcoin without running a full node, downloading any software or apps. We recommend treating Bitamp like you would treat your actual wallet. Try to not store large amounts on here as this might leave you at considerable risk. If you would like to use Bitcoin for long-term storage, we suggest creating an account, storing your seed in a safe place and only use your account once.</p>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</div><!-- END row -->
+			</div><!-- END container -->
+		</main><!-- END main -->
+
+		<!-- box-modal -->
+                <?php
+	require_once 'footer.html';
+?>

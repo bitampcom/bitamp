@@ -1,0 +1,1373 @@
+<?php
+$page = "account";
+	require_once 'header-account.html';
+?>
+<script>
+page_name = "account";
+var total_pages = 0;
+</script>
+<script>
+document.title = "Account Overview - Bitamp";
+
+$("#header-top-title").text("Account Overview");
+$("#header-top-description").text("Your account overview and recent transactions.");
+</script>
+	<main class="main def-page account">
+		<div class="container">
+			<div class="row">
+				<div class="account__block" style="padding-bottom: 5px;">
+					<div class="account__row">
+						<div class="account__input-wrap">
+							<div class="account__block-title">Receive Bitcoin</div>
+							<div>
+                                <select id="receive-address" onchange="update_selected_receive_address();">
+                                </select>
+                                <script>
+                                var qrcode_receive = new QRCode(document.getElementById("qrcode-receive"), {
+                                    text: "0",
+                                    width: 150,
+                                    height: 150,
+                                    colorDark : "#000000",
+                                    colorLight : "#ffffff",
+                                    correctLevel : QRCode.CorrectLevel.H
+                                    });
+                                function update_selected_receive_address()
+                                {
+                                   var receiveaddresslist_select = document.getElementById('receive-address');
+                                   var selected = receiveaddresslist_select.options[receiveaddresslist_select.selectedIndex].value; 
+                                   
+                                   document.getElementById('selected-address').innerHTML = selected;
+
+                                   qrcode_receive.clear();
+                                   qrcode_receive.makeCode("bitcoin:" + selected);
+
+                                }
+                                function update_receive_address()
+                                {
+                                    $('#receive-address').empty()
+                                    
+                                    var receiveaddresslist_select = document.getElementById('receive-address');
+                                        
+                                    if(account_single_private != '')
+                                    {
+                                        if(typeof account_total_tx[account_single_public_standard] !== 'undefined' && account_total_tx[account_single_public_standard] != 0)
+                                        {
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard_compressed;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_segwit;
+                                            receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_p2sh;
+                                            receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        else if(typeof account_total_tx[account_single_public_standard_compressed] !== 'undefined' && account_total_tx[account_single_public_standard_compressed] != 0)
+                                        {
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard_compressed;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_segwit;
+                                            receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_p2sh;
+                                            receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        else if(typeof account_total_tx[account_single_public_segwit] !== 'undefined' && account_total_tx[account_single_public_segwit] != 0)
+                                        {
+                                        
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_segwit;
+                                            receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard_compressed;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                                                      
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_p2sh;
+                                            receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        else if(typeof account_total_tx[account_single_public_p2sh] !== 'undefined' && account_total_tx[account_single_public_p2sh] != 0)
+                                        {
+                                        
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_p2sh;
+                                            receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard_compressed;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_segwit;
+                                            receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+
+                                        }
+                                        else
+                                        {
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_standard_compressed;
+                                            receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_segwit;
+                                            receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                            
+                                            receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = account_single_public_p2sh;
+                                            receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                    }
+                                    else 
+                                    {
+                                        var receiveaddresslist_option = document.createElement('option');
+                                        
+                                        var found_none = 1;
+                                        for (var i = 0; i < account_keys_legacy.length; i++)
+                                        {
+                                            var pub = account_keys_legacy[i]["public"];
+                                            
+                                            if(typeof account_total_tx[pub] === 'undefined')
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                            else if(account_total_tx[pub] == 0)
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if(found_none == 1)
+                                        {
+                                            var pub = account_keys_legacy[account_keys_legacy.length-1]["public"];
+                                            var receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = pub;
+                                            receiveaddresslist_option.innerHTML = pub;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        
+                                        found_none = 1;
+                                        for (var i = 0; i < account_keys_segwit.length; i++)
+                                        {
+                                            var pub = account_keys_segwit[i]["public"];
+                                            
+                                            if(typeof account_total_tx[pub] === 'undefined')
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                            else if(account_total_tx[pub] == 0)
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if(found_none == 1)
+                                        {
+                                            var pub = account_keys_segwit[account_keys_segwit.length-1]["public"];
+                                            var receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = pub;
+                                            receiveaddresslist_option.innerHTML = pub;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        
+                                        found_none = 1;
+                                        for (var i = 0; i < account_keys_p2sh.length; i++)
+                                        {
+                                            var pub = account_keys_p2sh[i]["public"];
+                                            
+                                            if(typeof account_total_tx[pub] === 'undefined')
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                            else if(account_total_tx[pub] == 0)
+                                            {
+                                                var receiveaddresslist_option = document.createElement('option');
+                                                receiveaddresslist_option.value = pub;
+                                                receiveaddresslist_option.innerHTML = pub;
+                                                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                found_none = 0;
+                                                break;
+                                            }
+                                        }
+                                        
+                                        if(found_none == 1)
+                                        {
+                                            var pub = account_keys_p2sh[account_keys_p2sh.length-1]["public"];
+                                            var receiveaddresslist_option = document.createElement('option');
+                                            receiveaddresslist_option.value = pub;
+                                            receiveaddresslist_option.innerHTML = pub;
+                                            receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                        }
+                                        
+                                    }
+                                    
+                                    update_selected_receive_address();
+                                }
+                                if(account_session_id)
+                                {
+                                    update_receive_address();
+                                }
+                                </script>
+							</div>
+						</div>
+						<div class="account__qr-wrap">
+                            <div id="qrcode-receive"></div>
+						</div>
+					</div>
+                    <div class="account__row" style="position: relative; top: -50px;">
+                    <span style="font-weight:bold; text-decoration: underline;">Selected receiving address:</span><span id="selected-address" style="margin-left: 10px; color: #959595; font-size: 13px; line-height: 24px;"></span><span id="copy-receive-address" style="text-decoration: underline; font-size: 12px; color: #2c9afa; cursor: pointer; margin-left: 5px; line-height: 24px;">copy</span>
+                    <script>
+                    document.getElementById("copy-receive-address").onclick = function(){ copy_field("selected-address"); };
+                    $("#copy-receive-address").addClass("copyready btn-copy2");
+                    </script>
+                    </div>
+				</div>
+				<div class="account__block" style="padding-bottom: 0px;">
+					<div class="account__top-wrap">
+						<div class="account__block-title">Transaction History</div>
+					</div>
+                    <script>
+                        account_transaction_page = 0;
+                        account_transaction_page_table = 0;
+                        
+                        function update_transactions_count()
+                        {
+                            must_refresh = 0;
+                            
+                            if(total_checked_txcount > 9)
+                            {
+                                must_refresh = 1;
+                            }
+                        
+                            if(account_session_id)
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/get_txcount.php',
+                                    data: {
+                                       session_id: account_session_id,
+                                       refresh: must_refresh
+                                    }
+                                }).done(function(new_tx){
+                                        if(must_refresh == 1)
+                                        {
+                                           total_checked_txcount = 0;
+                                        }
+                                        else
+                                        {
+                                            total_checked_txcount++;
+                                        }
+                                        if(new_tx != -1)
+                                        {
+                                            if(new_tx == -2)
+                                            {
+                                                window.location.href = '/';
+                                            }
+                                            else
+                                            {
+                                                if(account_txcount != new_tx)
+                                                {
+                                                    skip_matching_txcount = 1;
+                                                    account_txcount = parseInt(new_tx);
+                                                    update_transactions();
+                                                }
+                                            }
+                                        }
+                                        setTimeout(update_transactions_count, 2500);
+                                }).fail(function()
+                                {
+                                    setTimeout(update_transactions_count, 1000);
+                                });
+                            }
+                            else
+                            {
+                                setTimeout(update_transactions_count, 1000);
+                            }
+                        }
+                        if(account_updating_txcount == 0)
+                        {   
+                            account_updating_txcount = 1;
+                            update_transactions_count();
+                        }
+                        
+                        function update_addr_tx_counts()
+                        {
+                            if(account_session_id)
+                            {
+                             $.ajax({
+                                    type: "POST",
+                                    url: '/get_addr_txcount.php',
+                                    data: {
+                                       session_id: account_session_id
+                                    }
+                                }).done(function(list_tx)
+                                {
+                                    if(list_tx != -1)
+                                    {
+                                        if(account_addr_txcount != list_tx)
+                                        {
+                                            account_addr_txcount = list_tx;
+                                            unspent_updated = 0;
+                                            update_tx_counts();
+                                        }
+                                        setTimeout(update_addr_tx_counts, 2500);
+                                    }
+                                    else
+                                    {
+                                        setTimeout(update_addr_tx_counts, 1000);
+                                    }
+                                                                   
+                                }).fail(function()
+                                {
+                                    setTimeout(update_addr_tx_counts, 1000);
+                                });
+                                
+                            }
+                            else
+                            {
+                                setTimeout(update_addr_tx_counts, 1000);
+                            }
+                        }
+                        if(account_updating_addr_txcount == 0)
+                        {   
+                            account_updating_addr_txcount = 1;
+                            update_addr_tx_counts();
+                        }
+                        
+                        function update_tx_counts()
+                        {
+                            if(account_session_id)
+                            {
+                                array_combo = [];
+                                
+                                matching_count = 0;
+                                
+                                for(j in account_ids)
+                                {
+                                    array_combo.push([account_ids[j], account_total_tx[j]]);
+                                    matching_count += account_total_tx[j];
+                                }
+                                
+                                if(matching_count > 0 || skip_matching_txcount == 1)
+                                {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/tx_update.php',
+                                        data: {
+                                           session_id: account_session_id,
+                                           counts: JSON.stringify(array_combo)
+                                        }
+                                    }).done(function(list_tx)
+                                    {
+                                          
+                                        if(list_tx != "-1" && list_tx != "")
+                                        {
+                                            skip_matching_txcount = 0;
+                                            for(xid in list_tx)
+                                            {
+                                                gen_new_addr = 0;
+                                                if(account_single_private == "" && account_total_tx[xid] == 0 && list_tx[xid][0] > 0)
+                                                {
+                                                    acc_num = 0;
+                                                    if(seed_type == "bip39")
+                                                    {
+                                                        acc_num = account_bip39_number[xid];
+                                                        
+                                                        if(acc_num >= total_bip39_accounts)
+                                                        {
+                                                            add_new_account_bip39();
+                                                        }
+                                                    }
+                                                    process_create = get_address_index_valid_create_new(xid);
+                                                    if(account_address_type[xid] == 0 && process_create == true)
+                                                    {
+                                                        add_new_address_20(0, acc_num);
+                                                    }
+                                                    else if(account_address_type[xid] == 1 && process_create == true)
+                                                    {
+                                                        //add new segwit address
+                                                        add_new_address_20(1, acc_num);
+                                                    }
+                                                    else if(account_address_type[xid] == 2 && process_create == true)
+                                                    {
+                                                        //add new p2sh address
+                                                        add_new_address_20(2, acc_num);
+                                                    }
+                                                    else if(account_address_type[xid] == 3 && process_create == true)
+                                                    {
+                                                        //add new standard change address
+                                                        add_new_address_20(3, acc_num);
+                                                    }
+                                                    else if(account_address_type[xid] == 4 && process_create == true)
+                                                    {
+                                                        //add new segwit change address
+                                                        add_new_address_20(4, acc_num);
+                                                    }
+                                                    else if(account_address_type[xid] == 5 && process_create == true)
+                                                    {
+                                                        //add new p2sh change address
+                                                        add_new_address_20(5, acc_num);
+                                                    }
+                                                }
+                                                account_total_tx[xid] = list_tx[xid][0];
+                                                account_balances[xid] = parseInt(list_tx[xid][1]);
+                                                balance_modifier = 0;
+                                            }
+                                            
+                                            if(page_name == "account" || page_name == "account-receive")
+                                            {
+                                                update_receive_address();
+                                            }
+                                            else if(page_name == "account-addresses")
+                                            {
+                                                update_addresses();
+                                            }
+                                            
+                                        }
+                                        else
+                                        {
+                                            setTimeout(update_tx_counts, 1000);
+                                        }
+                                    
+                                    }).fail(function()
+                                    {
+                                        setTimeout(update_tx_counts, 1000);
+                                    });
+                                }
+                                else
+                                {
+                                    setTimeout(update_tx_counts, 1000);
+                                }
+                            }
+                        }
+                        
+                        function update_transactions()
+                        {
+                            if(account_session_id && account_added_address == 1)
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/get_transactions.php',
+                                    data: {
+                                       session_id: account_session_id,
+                                       page: account_transaction_page
+                                    }
+                                }).done(function(new_tx){
+                                        account_transactions = [];
+
+                                        if(new_tx)
+                                        {
+                                            for(var i = 0; i < new_tx.length; i++)
+                                            {
+                                                if(new_tx[i] != null)
+                                                {
+                                                
+                                                    try {
+                                                     new_tx[i] = JSON.parse(new_tx[i]);
+             
+                                                    if(typeof new_tx[i].value !== 'undefined')
+                                                    {
+                                                        txtype = 0;
+                                                        
+                                                        value_final = 0;
+                                                        
+                                                        value_received_final = 0;
+                                                        
+                                                        value_sent_final = 0;
+
+                                                        receive_address_found = 0;
+                                                        
+                                                        if(typeof new_tx[i].vin !== 'undefined')
+                                                        {
+                                                           for(var c = 0; c < new_tx[i].vin.length; c++)
+                                                           {
+                                                                if(typeof new_tx[i].vin[c].addresses !== 'undefined')
+                                                                {
+                                                                    for(var d = 0; d < new_tx[i].vin[c].addresses.length; d++)
+                                                                    {
+                                                                        if(address_exists(new_tx[i].vin[c].addresses[d]))
+                                                                        {
+                                                                            receive_address_found = 1;
+                                                                        }    
+                                                                    }
+                                                                }
+                                                           }
+                                                        }
+                                                        
+                                                        sent_found_vout = 0;
+          
+                                                        //detect tx type
+                                                        if(typeof new_tx[i].vout !== 'undefined')
+                                                        {
+                                                           for(var c = 0; c < new_tx[i].vout.length; c++)
+                                                           {
+                                                                if(typeof new_tx[i].vout[c].addresses !== 'undefined')
+                                                                {
+                                                                    for(var d = 0; d < new_tx[i].vout[c].addresses.length; d++)
+                                                                    {
+                                                                        if(!address_exists(new_tx[i].vout[c].addresses[d]))
+                                                                        {
+                                                                            sent_found_vout = 1;
+                                                                            value_final += parseInt(new_tx[i].vout[c].value);
+                                                                            value_sent_final += parseInt(new_tx[i].vout[c].value);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            value_received_final += parseInt(new_tx[i].vout[c].value);
+                                                                        }
+                                                                    }
+                                                                    if(sent_found_vout == 1)
+                                                                    {
+                                                                        txtype = 1; //sent;
+                                                                    }
+                                                                }
+                                                           }
+                                                        }
+                                                        
+                                                        if(receive_address_found == 1 && sent_found_vout == 0)
+                                                        {
+                                                            txtype = 2;
+                                                        }
+                                                        else if(receive_address_found == 0)
+                                                        {
+                                                            txtype = 0;
+                                                            value_final = value_received_final;
+                                                        }
+                                                        
+                                                        if(txtype == 1)
+                                                        {
+                                                            value_sent_final += parseInt(new_tx[i].fees);
+                                                            value_final = value_sent_final;
+                                                        }
+                                                        
+                                                        final_time_check = parseInt(new_tx[i].blockTime);
+                                                        
+                                                        if(final_time_check == 0)
+                                                        {
+                                                            temp_date = new Date();
+                                                            final_time_check = temp_date.getTime();
+                                                        }
+                                                        
+                                                        var curr_date_time = new Date(final_time_check*1000);
+                                                        var curr_date = ("0" + curr_date_time.getDate()).slice(-2);
+                                                        var curr_month = ("0" + (curr_date_time.getMonth() + 1)).slice(-2);
+                                                        var curr_year = curr_date_time.getFullYear();
+                                                        
+                                                        var curr_hours = ("0" + curr_date_time.getHours()).slice(-2);
+                                                        var curr_minutes = ("0" + curr_date_time.getMinutes()).slice(-2);
+                                                        var curr_seconds = ("0" + curr_date_time.getSeconds()).slice(-2);
+                                                        
+                                                        finaldate = curr_date + "-" + curr_month + "-" + curr_year + " " + curr_hours + ":" + curr_minutes + ":" + curr_seconds;
+                                                        account_transactions.push({"type": txtype, "date": finaldate, "blocktime": final_time_check, "txid": new_tx[i].txid, "block_height": new_tx[i].blockHeight, "value": value_final, "fees": new_tx[i].fees, "in_addresses":new_tx[i].vin, "out_addresses":new_tx[i].vout});
+                                                    }
+                                                    } catch(e) {
+                                                        console.log(e);
+                                                    }
+                                                }
+                                            }
+                                            loaded_settings_tx = 1;
+                                        }
+                                        if(page_name == "account")
+                                        {
+                                            display_transactions();
+                                        }
+                                }).fail(function()
+                                {
+                                    setTimeout(update_transactions, 1000);
+                                });
+                            }
+                            else
+                            {
+                                setTimeout(update_transactions, 1000);
+                            }
+                        }
+                            
+                        function update_balance()
+                        {
+                            if(account_session_id)
+                            {
+                                force_update_balance();
+                            }
+                            setTimeout(update_balance, 1000);
+                        }
+                        if(account_updating_balance == 0)
+                        {   
+                            account_updating_balance = 1;
+                            update_balance();
+                        }
+                        
+                        function update_new_account_keys()
+                        {
+                            if(account_session_id)
+                            {
+                                if(account_keys_new.length > 0)
+                                {
+                                    var account_keys_new_process = [];
+                                    
+                                    for(var i = 0; i < account_keys_new.length; i++)
+                                    {
+                                        //signing message to prove ownership of address (spam prevention method)
+                                        keypair_message = bitcoinjs.ECPair.fromWIF(account_keys_new[i].private, bitcoinjs.networks.bitcoin);
+                                        pkey_message = keypair_message.privateKey;
+                                        verify_message = "address verification";
+                                        signature_message = "";
+                                        if(account_address_type[account_keys_new[i].public] == 0 || account_address_type[account_keys_new[i].public] == 3)
+                                        {
+                                            signature_message = bitcoinjs.bitcoin_message.sign(verify_message, pkey_message, keypair_message.compressed).toString('base64');
+                                        }
+                                        else if(account_address_type[account_keys_new[i].public] == 1 || account_address_type[account_keys_new[i].public] == 4)
+                                        {
+                                            signature_message = bitcoinjs.bitcoin_message.sign(verify_message, pkey_message, keypair_message.compressed, { segwitType: 'p2wpkh' }).toString('base64');
+                                        }
+                                        else if(account_address_type[account_keys_new[i].public] == 2 || account_address_type[account_keys_new[i].public] == 5)
+                                        {
+                                            signature_message = bitcoinjs.bitcoin_message.sign(verify_message, pkey_message, keypair_message.compressed, { segwitType: 'p2sh(p2wpkh)' }).toString('base64');
+                                        }
+                                        account_keys_new_process.push([account_keys_new[i].public, account_address_type[account_keys_new[i].public], signature_message]);
+                                    }
+ 
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '/add_address.php',
+                                        data: {
+                                           session_id: account_session_id,
+                                           keys: JSON.stringify(account_keys_new_process),
+                                           initial: account_updating_account_keys_initial
+                                        }
+                                    }).done(function(list_keys){
+                                            var process_new_keys_timer = 1000;
+                                            account_updating_account_keys_initial = 0;
+                                            if(list_keys)
+                                            {
+                                                for(var i = 0; i < list_keys.length; i++)
+                                                {   
+                                                    if(typeof list_keys[i] !== 'undefined')
+                                                    {
+                                                        var addr_info = list_keys[i].split(":");
+                                                        if(remove_new_address(addr_info[0]))
+                                                        {
+                                                            account_balances[addr_info[0]] = parseInt(addr_info[1]);
+                                                            account_total_tx[addr_info[0]] = parseInt(addr_info[2]);
+                                                            account_ids[addr_info[0]] = parseInt(addr_info[4]);
+                                                            if(account_total_tx[addr_info[0]] > 0 && account_single_private == '')
+                                                            {
+                                                                acc_num = 0;
+                                                                if(seed_type == "bip39")
+                                                                {
+                                                                    acc_num = account_bip39_number[addr_info[0]];
+                                                                    
+                                                                    if(acc_num >= total_bip39_accounts)
+                                                                    {
+                                                                        add_new_account_bip39();
+                                                                    }
+                                                                }
+                                                            
+                                                                process_create = get_address_index_valid_create_new(addr_info[0]);
+                                                                if(account_address_type[addr_info[0]] == 0 && process_create == true)
+                                                                {
+                                                                    //add new standard address
+                                                                    add_new_address_20(0, acc_num);
+                                                                }
+                                                                else if(account_address_type[addr_info[0]] == 1 && process_create == true)
+                                                                {
+                                                                    //add new segwit address
+                                                                    add_new_address_20(1, acc_num);
+                                                                }
+                                                                else if(account_address_type[addr_info[0]] == 2 && process_create == true)
+                                                                {
+                                                                    //add new p2sh address
+                                                                    add_new_address_20(2, acc_num);
+                                                                }
+                                                                else if(account_address_type[addr_info[0]] == 3 && process_create == true)
+                                                                {
+                                                                    //add new standard change address
+                                                                    add_new_address_20(3, acc_num);
+                                                                }
+                                                                else if(account_address_type[addr_info[0]] == 4 && process_create == true)
+                                                                {
+                                                                    //add new segwit change address
+                                                                    add_new_address_20(4, acc_num);
+                                                                }
+                                                                else if(account_address_type[addr_info[0]] == 5 && process_create == true)
+                                                                {
+                                                                    //add new p2sh change address
+                                                                    add_new_address_20(5, acc_num);
+                                                                }
+                                                                i = 0;
+                                                                process_new_keys_timer = 10;
+                                                            }  
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                account_added_address = 1;
+                                                if(page_name == "account")
+                                                {         
+                                                    update_transactions();
+                                                }
+                                                
+                                                if(page_name == "account" || page_name == "account-receive")
+                                                {         
+                                                    update_receive_address();
+                                                }
+                                                else if(page_name == "account-addresses")
+                                                {
+                                                    update_addresses();
+                                                }
+                                            }
+                                            cached_final_balance = -1;
+                                            setTimeout(update_new_account_keys, process_new_keys_timer);
+                                    }).fail(function()
+                                    {
+                                        setTimeout(update_new_account_keys, 1000);
+                                    });
+                                }
+                                else
+                                {
+                                 setTimeout(update_new_account_keys, 1000);
+                                }
+                            }
+                            else
+                            {
+                                setTimeout(update_new_account_keys, 1000);
+                            }
+                        }
+                        if(account_updating_account_keys == 0)
+                        {   
+                            account_updating_account_keys = 1;
+                            account_updating_account_keys_initial = 1;
+                            update_new_account_keys();
+                        }
+                        
+                        function display_transactions()
+                        {
+                            $("#tx_list").empty();
+                            total_displayed = 0;
+                            
+                            account_transactions.sort(function (a, b) {
+                                if(parseInt(a.blocktime) == parseInt(b.blocktime))
+                                { 
+                                    if(a.type == b.type)
+                                    {
+                                        return 0;
+                                    }
+                                }
+                                if (parseInt(a.blocktime) == -1) return -1;
+                                if (parseInt(b.blocktime) == -1) return 1;
+                                
+                                if (parseInt(a.blocktime) > parseInt(b.blocktime)) return -1;
+                                if (parseInt(a.blocktime) < parseInt(b.blocktime)) return 1;
+
+                                if (a.type == b.type) return 0;
+                                if (a.type > b.type)
+                                {
+                                    return -1;
+                                }
+                                if (a.type < b.type)
+                                {
+                                    return 1;
+                                }
+                            });
+                            
+                            for(var i = 0; i < account_transactions.length; i++)
+                            {
+                                if(parseInt(account_transactions[i]["block_height"]) == -1 && account_transaction_page > 0)
+                                {  
+                                    contains_unconfirmed = 1;
+                                    continue;
+                                }
+   
+                               total_displayed++;
+                               var element = document.createElement("div");
+                               
+                               var final_tx_msg = "";
+                               
+                               if(account_transactions[i]["type"] == 1)
+                               {
+                                element.setAttribute('class', 'stat__row stat__row--sent');
+                                final_tx_msg = "Sent";
+                               }
+                               else if(account_transactions[i]["type"] == 0)
+                               {
+                                element.setAttribute('class', 'stat__row stat__row--received');
+                                final_tx_msg = "Received";
+                               }
+                               else if(account_transactions[i]["type"] == 2)
+                               {
+                                element.setAttribute('class', 'stat__row stat__row--internal');
+                                final_tx_msg = "Internal";
+                               }
+                               
+                               var element_1 = document.createElement("div");
+                               element_1.setAttribute('class', 'stat__col');
+                               
+                               var element_1_1 = document.createElement("div");
+                               element_1_1.setAttribute('class', 'stat__operation');
+                               element_1_1.setAttribute("style", 'margin-top: 15px;');
+                               element_1_1.innerHTML = final_tx_msg;
+                               
+                               var element_1_2 = document.createElement("div");
+                               element_1_2.setAttribute('class', 'stat__operation-date');
+                               element_1_2.innerHTML = account_transactions[i]["date"];
+                               
+                               element_1.appendChild(element_1_1);
+                               element_1.appendChild(element_1_2);
+                               
+                               var element_2 = document.createElement("div");
+                               element_2.setAttribute('class', 'stat__col');
+                               
+                               var element_2_1 = document.createElement("div");
+                               element_2_1.setAttribute('class', 'stat__my-wallet');
+                               element_2_1.setAttribute("style", 'color:#2d9afa; cursor:pointer;');
+                               element_2_1.innerHTML = "<span onclick=\"check_tx_box('" +  account_transactions[i]["txid"] + "')\">" + account_transactions[i]["txid"] + "</span>";
+
+                               var element_2_2 = document.createElement("div");
+                               element_2_2.setAttribute('class', 'stat__other-wallet');
+                               element_2_2.innerHTML = account_transactions[i]["txid"];
+                               
+                               element_2.appendChild(element_2_1);
+                               //element_2.appendChild(element_2_2);
+                               
+                               var element_3 = document.createElement("div");
+                               
+                               var block_height_diff = (block_height - parseInt(account_transactions[i]["block_height"])) + 1;
+                               
+                               if(parseInt(account_transactions[i]["block_height"]) == -1)
+                               {
+                                    element_3.setAttribute('class', 'stat__col stat__col--unconfirmed');
+                                    final_tx_msg = "Unconfirmed";
+                                    contains_unconfirmed = 1;
+                               }
+                               else
+                               {
+                                   if(block_height_diff >= 3)
+                                   {
+                                    element_3.setAttribute('class', 'stat__col stat__col--confirmed');
+                                    final_tx_msg = "Confirmed";
+                                   }
+                                   else
+                                   {
+                                    element_3.setAttribute('class', 'stat__col stat__col--pending');
+                                    element_3.setAttribute("style", 'margin-top: 15px;');
+                                    final_tx_msg = "Pending";
+                                   }
+                               }
+                               
+                               if(block_height_diff > 3)
+                               {
+                                    block_height_diff = 3;
+                               }
+                               
+                               var element_3_1 = document.createElement("div");
+                               element_3_1.setAttribute('class', 'stat__status');
+                               element_3_1.innerHTML = final_tx_msg;
+                               
+                               var element_3_2 = document.createElement("div");
+                               element_3_2.setAttribute('class', 'stat__process');
+                               element_3_2.innerHTML = block_height_diff + "/3";
+                               
+                               element_3.appendChild(element_3_1);
+                               
+                               if(final_tx_msg != "Confirmed" && final_tx_msg != "Unconfirmed")
+                               {
+                                    element_3.appendChild(element_3_2);
+                               }
+                               
+                               var element_4 = document.createElement("div");
+                               element_4.setAttribute('class', 'stat__col');
+                               
+                               var element_4_1 = document.createElement("div");
+                               element_4_1.setAttribute('class', 'stat__operation-balance');
+                               element_4_1.setAttribute("style", 'margin-top: 15px;');
+                               
+                               var element_4_2 = document.createElement("div");
+                               element_4_2.setAttribute('class', 'stat__result-balance');
+                        
+                               var tx_usd_value = (parseFloat(parseFloat(account_transactions[i]["value"])/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+        
+                               if(account_transactions[i]["type"] == 2)
+                               {
+                                    tx_usd_value = (parseFloat(parseFloat(account_transactions[i]["fees"])/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+                               }
+                    
+                               if(account_transactions[i]["type"] == 1)
+                               {
+                                element_4_1.innerHTML = "-" + parseFloat(parseFloat(account_transactions[i]["value"])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                                element_4_2.innerHTML = "-" + selected_currency_left[selected_currency] + tx_usd_value;
+                                
+                                element_4_1.setAttribute("style", 'color: #f64646; margin-top: 15px;');
+                                element_4_2.setAttribute("style", 'color: #f64646;');
+                               }
+                               else if(account_transactions[i]["type"] == 0)
+                               {
+                                element_4_1.innerHTML = "+" + parseFloat(parseFloat(account_transactions[i]["value"])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                                element_4_2.innerHTML = "+" + selected_currency_left[selected_currency] + tx_usd_value;
+                               }
+                               else if(account_transactions[i]["type"] == 2)
+                               {
+                                element_4_1.innerHTML = "-" + parseFloat(parseFloat(account_transactions[i]["fees"])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                                element_4_2.innerHTML = "-" + selected_currency_left[selected_currency] + tx_usd_value;
+                                
+                                element_4_1.setAttribute("style", 'color: #f64646; margin-top: 15px;');
+                                element_4_2.setAttribute("style", 'color: #f64646;');
+                               }
+                                
+                               element_4.appendChild(element_4_1);
+                               element_4.appendChild(element_4_2);
+                               
+                               element.appendChild(element_1);
+                               element.appendChild(element_2);
+                               element.appendChild(element_3);
+                               element.appendChild(element_4);
+                               
+                               document.getElementById("tx_list").appendChild(element);
+                               
+                               if(total_displayed >= 10)
+                               {
+                                   break;
+                               }
+                            }
+                            
+                            $("#pagination").empty();
+                            
+                            final_tx_acc = account_txcount;
+                            total_unconfirmed_x = 0;
+                            for(var h = 0; h < account_transactions.length; h++)
+                            {
+                                if(parseInt(account_transactions[h]["block_height"]) == -1)
+                                { 
+                                    total_unconfirmed_x++;
+                                }
+                            }
+                            final_tx_acc -= total_unconfirmed_x;
+                        
+                            
+                            if(final_tx_acc <= 0)
+                            {
+                                total_pages = 0;
+                            }
+                            else
+                            {
+
+                                total_pages = Math.ceil(final_tx_acc / 10);
+                                page_start_at = 0;
+                                
+                                if(account_transaction_page > 0)
+                                {
+                                    page_start_at = (5 % account_transaction_page);
+                                }
+                                
+                                if(account_transaction_page_table > 0)
+                                {
+                                    v = 0;
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[first]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                                
+                                if(account_transaction_page-1 >= 0)
+                                {
+                                    v = account_transaction_page-1;
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[previous]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                                
+                                if(account_transaction_page_table > 0)
+                                {
+                                    v = ((account_transaction_page_table*5)-1);
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[...]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                                
+                                for(v = account_transaction_page_table*5; v < total_pages && v < (account_transaction_page_table*5)+5; v++)
+                                {
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = (v+1).toString();
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                                
+                                if(((account_transaction_page_table*5)+5) < total_pages)
+                                {
+                                    v = ((account_transaction_page_table*5)+5);
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[...]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+
+                                if(account_transaction_page+1 < total_pages)
+                                {
+                                    v = account_transaction_page+1;
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[next]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                                
+                                if(((account_transaction_page_table*5)+5) < total_pages)
+                                {
+                                    v = total_pages-1;
+                                    var page_element_1 = document.createElement("li");
+                                    page_element_1.setAttribute('id', 'page_' + v.toString());
+                                    page_element_1.setAttribute('class', 'paging');
+                                    if(account_transaction_page == v)
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; font-weight: bold; font-size: 16px; cursor: default; background-color: #ececec;');
+                                    }
+                                    else
+                                    {
+                                        page_element_1.setAttribute('style', 'display: inline-block; padding: 10px; margin-top: 10px; cursor: pointer; color: #2992ef; font-size: 18px;');
+                                    }
+                                    page_element_1.innerHTML = "[last]";
+                                  
+                                    document.getElementById("pagination").appendChild(page_element_1);
+                                }
+                            }
+
+                            $(".paging").unbind().click(
+                              function(event) {
+                                 event.preventDefault();
+                                 var stay = 0;
+                                 var page_val = $(this).attr('id').slice(5);
+                                 if(page_val == 'next')
+                                 {
+                                    if(account_transaction_page+1 < total_pages)
+                                    {
+                                        account_transaction_page += 1;
+                                    }   
+                                 }
+                                 else if(page_val == 'back')
+                                 {
+                                    if(account_transaction_page > 0)
+                                    {
+                                        account_transaction_page -= 1;
+                                    }
+                                    else
+                                    {
+                                        account_transaction_page = 0;
+                                    }
+                                 }
+                                 else
+                                 {
+                                    if(account_transaction_page == parseInt(page_val))
+                                    {
+                                        stay = 1;
+                                    }
+                                    else
+                                    {
+                                        account_transaction_page = parseInt(page_val);
+                                    }
+                                 }
+                                 if(stay == 0)
+                                 {
+                                    account_transaction_page_table = Math.floor(account_transaction_page / 5);
+                                    update_transactions();
+                                 }
+                              }
+                            );
+
+                           if(account_transactions.length == 0)
+                           {
+                                if(loaded_settings_tx == 1)
+                                {
+                                    $('#tx-loading-div').hide();
+                                    $("#no-tx-div").show();
+                                }
+                           }
+                           else
+                           {
+                                $("#no-tx-div").hide();
+                                if(loaded_settings_tx == 1)
+                                {
+                                    $('#tx-loading-div').hide();
+                                }
+                           }
+                        }
+                        
+                    update_transactions();
+                    </script>
+					<div id="tx_list" class="stat__table">
+						
+					</div>
+                    <div id="tx-loading-div" style="text-align: center; font-size: 11px; margin-bottom: 60px;"><img width="24px" height="24px" src="img/loading-tx.svg"></div>
+                    <script>
+                    if(loaded_settings_tx == 1)
+                    {
+                        $('#tx-loading-div').hide();
+                    }
+                    </script>
+                    <div id="no-tx-div" style="text-align: center; font-size: 11px; margin-bottom: 60px; display: none;">No Transactions</div>
+                    <ul id="pagination" style="text-align: center;">
+                    
+                    </ul>
+				</div>
+			</div>
+		</div>
+	</main>
+    <div id="tx-box" style="position:fixed; top:50%; left: 50%; margin-top: -200px; margin-left: -375px; z-index:9999; display: none;">
+			<div id="txbox-modal" class="home__modal-welcome box-modal modal-bg-pattern" style="font-family: 'Roboto', sans-serif;">
+				<div class="box-modal__close arcticmodal-close"></div>
+				<ul class="box-modal__alt-list def-list-zero" style="z-index: 5;">
+                    <li class="box-modal__alt-item">
+						<div class="box-modal__col" style="z-index: 5; margin: auto;"><h4 style="color:#287df5">Transaction Details</h4></div>
+					</li>
+					<li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">Hash</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-hash" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303;"></div>
+					</li>
+					<li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">Date</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-date" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303;"></div>
+					</li>
+					<li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">Confirmations</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-confirmations" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303;"></div>
+					</li>
+                    <li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">Value</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-value" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303;"></div>
+					</li>
+                     <li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">Fees</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-fees" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303;"></div>
+					</li>
+                     <li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">From</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-from" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303; text-align:center;"></div>
+					</li>
+                     <li class="box-modal__alt-item" style="margin-bottom: 10px; margin-top: 10px;">
+						<div class="box-modal__col" style="z-index: 5; margin: auto; font-weight: bold; color: #434343; font-size: 18px; cursor: default;">To</div>
+					</li>
+                    <li class="box-modal__alt-item">
+						<div id="tx-box-to" class="box-modal__col" style="z-index: 5; margin: auto; color: #030303; text-align:center;"></div>
+					</li>
+				</ul>
+			</div>
+		</div>
+        <script>
+        function check_tx_box(txid)
+        {
+            found_txid = -1;
+            for(var a = 0; a < account_transactions.length; a++)
+            {
+                if(account_transactions[a].txid == txid)
+                {
+                    found_txid = a;
+                    break;
+                }
+            }
+            if(found_txid != -1)
+            {
+                //account_transactions.push({"type": txtype, "date": finaldate, "blocktime": final_time_check, "txid": new_tx[i].txid, "block_height": new_tx[i].blockHeight, "value": value_final, "fees": new_tx[i].fees, "in_addresses":new_tx[i].vin, "out_addresses":new_tx[i].vout});
+                $("#tx-box-hash").html(account_transactions[found_txid].txid);
+                $("#tx-box-date").html(account_transactions[found_txid].date);
+
+                confirmations_final = (block_height - parseInt(account_transactions[found_txid].block_height) + 1);
+                
+                if(confirmations_final < 0)
+                {
+                    confirmations_final = 0;
+                }
+                
+                $("#tx-box-confirmations").html(confirmations_final.toString());
+                
+                $("#tx-box-value").html((parseFloat(account_transactions[found_txid].value)/100000000).toString() + ' BTC');
+                
+                $("#tx-box-fees").html((parseFloat(account_transactions[found_txid].fees)/100000000).toString() + ' BTC');
+                
+                fromaddresses = [];
+                for(var a = 0; a < account_transactions[found_txid].in_addresses.length; a++)
+                {
+                    if(typeof account_transactions[found_txid].in_addresses[a].addresses !== 'undefined')
+                    {
+                        for(var d = 0; d < account_transactions[found_txid].in_addresses[a].addresses.length; d++)
+                        {
+                            fromaddresses.push(account_transactions[found_txid].in_addresses[a].addresses[d]);
+                        }
+                    }
+                }
+                
+                toaddresses = [];
+                for(var a = 0; a < account_transactions[found_txid].out_addresses.length; a++)
+                {
+                    if(typeof account_transactions[found_txid].out_addresses[a].addresses !== 'undefined')
+                    {
+                        for(var d = 0; d < account_transactions[found_txid].out_addresses[a].addresses.length; d++)
+                        {
+                            toaddresses.push(account_transactions[found_txid].out_addresses[a].addresses[d]);
+                        }
+                    }
+                }
+                
+                final_html_from = "";
+                for(var a = 0; a < fromaddresses.length; a++)
+                {
+                    final_html_from += fromaddresses[a] + "<br><br>";
+                }
+                
+                final_html_to = "";
+                for(var a = 0; a < toaddresses.length; a++)
+                {
+                    final_html_to += toaddresses[a] + "<br><br>";
+                }
+                
+                $("#tx-box-from").html(final_html_from);
+                $("#tx-box-to").html(final_html_to);
+                
+                $('.home__modal-welcome').arcticmodal();
+            }
+        }
+        </script>
+    <?php
+	require_once 'footer-account.html';
+?>

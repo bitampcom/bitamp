@@ -1,0 +1,1448 @@
+<?php
+$page = "account-send";
+	require_once 'header-account.html';
+?>
+<script>
+document.title = "Send Bitcoins - Bitamp";
+$("#header-top-title").text("Send Bitcoin");
+$("#header-top-description").text("Transfer to anyone, anywhere in the world.");
+</script>
+<script>
+page_name = "account-send";
+
+var selected_utxo = [];
+var tx_bitcoinamount = 0;
+var tx_donationamount = 0;
+var tx_amountchange = 0;
+var tx_amountfees = 0;
+
+var gen_new_address_type = -1;
+var gen_new_address_xid = "";
+
+var last_was_max = false;
+
+var dust_threshold = 0.000009;
+
+var allowed_url = [];
+allowed_url.push("bitpay.com");
+
+var payment_request_fee = -1;
+
+function decode_bitcoin_address()
+{
+    $('#payment-request-btn').removeClass("btnrequestenabled");
+    payment_request_fee = -1;
+    $('#note-request').text("");
+    $('#note-request').hide();
+    decode_payment_url($("#bitcoinaddress").val());
+}
+
+function valid_url(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ 
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ 
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ 
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ //
+    '(\\#[-a-z\\d_]*)?$','i'); //
+  return !!pattern.test(str);
+}
+
+function decode_payment_url(url)
+{
+    if(url == "")
+    {
+        return false;
+    }
+    try
+    {
+        decoded_value = bitcoinjs.bip21.decode(url);
+        if(typeof decoded_value.options !== 'undefined')
+        {
+            if(typeof decoded_value.options.r !== 'undefined')
+            {
+                final_url = decoded_value.options.r;
+                if(valid_url(final_url))
+                {
+                    var final_domain = final_url.replace('http://','').replace('https://','').replace('www.','').split(/[/?#]/)[0];
+                    
+                    if(allowed_url.indexOf(final_domain) != -1)
+                    {
+                        var request_settings = {
+                          'dataType': "text",
+                          "url": decoded_value.options.r,
+                          "headers": {
+                              "Accept": "application/payment-request"
+                          }
+                      }
+                                    
+                           $.ajax(request_settings).done(function(payment_request_txt){
+                                    try
+                                    {
+                                    var payment_request = JSON.parse(payment_request_txt);
+                                    if(payment_request.network === 'undefined' || payment_request.currency === 'undefined' || payment_request.outputs === 'undefined')
+                                    {
+                                        return true;
+                                    }
+                                    
+                                    if(payment_request.network.toLowerCase() != "main" || payment_request.currency.toLowerCase() != "btc")
+                                    {
+                                        return true;
+                                    }
+                                    
+                                    if(payment_request.outputs.length > 1 || payment_request.outputs.length == 0)
+                                    {
+                                        return true;
+                                    }
+                                    
+                                    if(payment_request.requiredFeeRate !== 'undefined')
+                                    {
+                                        if(payment_request.requiredFeeRate > 0)
+                                        {
+                                            payment_request_fee = (payment_request.requiredFeeRate/100000000);
+                                        }
+                                        else
+                                        {
+                                            payment_request_fee = payment_request.requiredFeeRate;
+                                        }
+                                    }
+                                    
+                                    if(payment_request.outputs[0].amount === 'undefined' || payment_request.outputs[0].address === 'undefined')
+                                    {
+                                        return true;
+                                    }
+                                    else
+                                    { 
+                                        $('#payment-request-btn').addClass("btnrequestenabled");
+                                        $('#bitcoinaddress').val(payment_request.outputs[0].address);
+                                        $('#btc-amount-input').val(payment_request.outputs[0].amount/100000000);
+                                    }
+   
+                                    if(payment_request.memo !== 'undefined')
+                                    {
+                                        if(!payment_request.memo.includes("script"))
+                                        {
+                                            $('#note-request').text(payment_request.memo);
+                                            $('#note-request').show();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        $('#note-request').text("");
+                                        $('#note-request').hide();
+                                    }
+                                    verifybtcamount();
+                                    }
+                                    catch(e)
+                                    {
+                                        console.log(e);
+                                        return true;
+                                    }
+                            }).fail(function()
+                            {
+                                
+                            });
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    catch(e)
+    {
+
+    }
+    return false;
+}
+
+function clear_send_fields()
+{
+    $("#bitcoinaddress").val("");
+    $("#priority_fee").text("Priority 0.00000000 BTC");
+    $("#regular_fee").text("Regular 0.00000000 BTC");
+    $("#slow_fee").text("Slow 0.00000000 BTC");
+    
+    $("#btc-amount-input").val("");
+    $("#usd-amount-input").val("");
+    $("#donation-amount").val("0.00");
+    $("#support-btn").removeClass("hide");
+    
+    transaction_ready = false;
+    transaction_confirmed = false;
+    exceeded_spendable = false;
+    bitcoinamount = 0;
+    donationamount = 0;
+    
+    tx_bitcoinamount = 0;
+    tx_donationamount = 0;
+    tx_amountchange = 0;
+    tx_amountfees = 0;
+    
+    gen_new_address_xid = "";
+    gen_new_address_type = -1;
+    
+    payment_request_fee = -1;
+    $('#note-request').text("");
+    $('#note-request').hide();
+    $('#payment-request-btn').removeClass("btnrequestenabled");
+}
+
+function update_unspent_outputs()
+{
+    if(account_session_id && account_added_address == 1 && page_name == "account-send" && unspent_updated == 0)
+    {
+        $.ajax({
+            type: "POST",
+            url: '/get_unspent.php',
+            data: {
+               session_id: account_session_id
+            }
+        }).done(function(unspent_data){
+                estimated_fee = unspent_data[0];
+                if(estimated_fee == -1)
+                {
+                    unspent_updated = 0;
+                }
+                else
+                {
+                    unspent_outputs = unspent_data[1];
+                    update_selected_outputs();
+                    unspent_updated = 1;
+                }
+                setTimeout(update_unspent_outputs, 1000);
+        }).fail(function()
+        {
+            setTimeout(update_unspent_outputs, 1000);
+        });
+    }
+    else
+    {
+        setTimeout(update_unspent_outputs, 1000);
+    }
+}
+
+if(account_updating_unspent == 0)
+{
+    account_updating_unspent = 1;
+    update_unspent_outputs();
+}
+
+var transaction_ready = false;
+var transaction_confirmed = false;
+var exceeded_spendable = false;
+
+function setmax()
+{
+    last_was_max = true;
+    update_selected_outputs(0, true, false);
+}
+
+function update_selected_outputs_changes()
+{
+    update_selected_outputs(0, last_was_max, false);
+}
+
+function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
+{
+    if(reset_max == true)
+    {
+        last_was_max = false;
+    }
+    transaction_ready = false;
+    transaction_confirmed = false;
+    exceeded_spendable = false;
+    bitcoinamount = 0;
+    donationamount = 0;
+    
+    tx_bitcoinamount = 0;
+    tx_donationamount = 0;
+    tx_amountchange = 0;
+    tx_amountfees = 0;
+    
+    $('#btc-amount-input').removeClass("overlimitval");
+    $('#donation-amount').removeClass("overlimitval");
+
+    if(added_fee == 0)
+    {
+        $("#priority_fee").text("Priority 0.00000000 BTC");
+        $("#regular_fee").text("Regular 0.00000000 BTC");
+        $("#slow_fee").text("Slow 0.00000000 BTC");
+    }
+ 
+    selected_utxo = [];
+    
+    if(sending_max == false || (sending_max == true && added_fee != 0))
+    {
+        if($("#btc-amount-input").val() == "")
+        {
+            selected_utxo = [];
+            return false;
+        }
+        
+        try
+        {
+            bitcoinamount = parseFloat($("#btc-amount-input").val());
+        }
+        catch(e)
+        {
+            selected_utxo = [];
+            return false;
+        }
+    }
+    
+    
+    if($("#donation-amount").val() == "")
+    {
+        donationamount = 0;
+    }
+    else
+    {
+        try
+        {
+            donationamount = parseFloat($("#donation-amount").val());
+        }
+        catch(e)
+        {
+            donationamount = 0;
+        }
+    }
+
+    if(bitcoinamount <= 0 && (sending_max == false || added_fee != 0))
+    {
+        selected_utxo = [];
+        return false;
+    }
+    
+    if(unspent_outputs.length == 0)
+    {
+        selected_utxo = [];
+        return false;
+    }
+    
+    var confirmed_utxo = [];
+    var unconfirmed_utxo = [];
+    var locked_utxo = [];
+    
+    for(var u = 0; u < unspent_outputs.length; u++)
+    {
+        for(var d = 0; d < unspent_outputs[u].utxo.length; d++)
+        {
+            unspent_outputs[u].utxo[d].address = unspent_outputs[u].address;
+            if(typeof unspent_outputs[u].utxo[d].lockTime !== 'undefined')
+            {
+                if(unspent_outputs[u].utxo[d].lockTime > block_height)
+                {
+                    locked_utxo.push(unspent_outputs[u].utxo[d]);
+                    continue;
+                }
+            }
+            
+            if(typeof unspent_outputs[u].utxo[d].confirmations !== 'undefined')
+            {
+                if(unspent_outputs[u].utxo[d].confirmations > 0)
+                {
+                    if((parseFloat(unspent_outputs[u].utxo[d].value)/100000000) > dust_threshold)
+                    {
+                        confirmed_utxo.push(unspent_outputs[u].utxo[d]);
+                    }
+                    continue;
+                }
+            }
+            
+            if((parseFloat(unspent_outputs[u].utxo[d].value)/100000000) > dust_threshold)
+            {
+                unconfirmed_utxo.push(unspent_outputs[u].utxo[d]);
+            }
+        }
+    }
+    
+    confirmed_utxo.sort(function (a, b) {
+    if(parseFloat(a.value) == parseFloat(b.value))
+    { 
+        return 0;
+    }
+
+    if (parseFloat(a.value) > parseFloat(b.value)) return -1;
+    if (parseFloat(a.value) < parseFloat(b.value)) return 1;
+    });
+    
+    unconfirmed_utxo.sort(function (a, b) {
+    if(parseFloat(a.value) == parseFloat(b.value))
+    { 
+        return 0;
+    }
+
+    if (parseFloat(a.value) > parseFloat(b.value)) return -1;
+    if (parseFloat(a.value) < parseFloat(b.value)) return 1;
+    });
+    
+    locked_utxo.sort(function (a, b) {
+    if(parseFloat(a.value) == parseFloat(b.value))
+    { 
+        return 0;
+    }
+
+    if (parseFloat(a.value) > parseFloat(b.parseFloat)) return -1;
+    if (parseFloat(a.value) < parseFloat(b.parseFloat)) return 1;
+    });
+    
+    if(sending_max == false || added_fee != 0)
+    {
+        missing_amount = bitcoinamount + donationamount + added_fee;
+    }
+    else
+    {
+        missing_amount = 0;
+    }
+    
+    if(sending_max == true  && added_fee == 0)
+    {
+        for(var u = 0; u < confirmed_utxo.length; u++)
+        {
+             bitcoinamount += (parseFloat(confirmed_utxo[u].value)/100000000);
+        }
+        for(var u = 0; u < unconfirmed_utxo.length; u++)
+        {
+             bitcoinamount += (parseFloat(unconfirmed_utxo[u].value)/100000000);
+        }
+        bitcoinamount -= donationamount;
+        
+        missing_amount = bitcoinamount + donationamount;
+        
+        if(bitcoinamount <= 0)
+        {
+            selected_utxo = [];
+            return false;
+        }
+    }
+    
+    if(missing_amount > 0)
+    {
+        for(var u = 0; u < confirmed_utxo.length; u++)
+        {
+             selected_utxo.push(confirmed_utxo[u]);
+             missing_amount -= (parseFloat(confirmed_utxo[u].value)/100000000);
+             
+             if(missing_amount <= 0)
+             {
+                break;
+             }
+        }
+    }
+    
+    if(missing_amount > 0)
+    {
+        for(var u = 0; u < unconfirmed_utxo.length; u++)
+        {
+             selected_utxo.push(unconfirmed_utxo[u]);
+             missing_amount -= (parseFloat(unconfirmed_utxo[u].value)/100000000);
+             
+             if(missing_amount <= 0)
+             {
+                break;
+             }
+        }
+    }
+    
+    if(missing_amount > 0)
+    {
+        if(missing_amount < 0.00000001)
+        {
+            missing_amount = 0;
+        }
+        else
+        {   
+            if(bitcoinamount > 0)
+            {
+                $('#btc-amount-input').addClass("overlimitval");
+            }
+            else
+            {
+                $('#btc-amount-input').removeClass("overlimitval");
+            }
+            
+            if(donationamount > 0)
+            {
+                $('#donation-amount').addClass("overlimitval");
+            }
+            else
+            {
+                $('#donation-amount').removeClass("overlimitval");
+            }
+            
+            $("#priority_fee").text("Priority 0.00000000 BTC");
+            $("#regular_fee").text("Regular 0.00000000 BTC");
+            $("#slow_fee").text("Slow 0.00000000 BTC");
+            exceeded_spendable = true;
+            selected_utxo = [];
+            return false;
+        }
+    }
+    
+    tx_bitcoinamount = bitcoinamount;
+    tx_donationamount = donationamount;
+    
+    tx_amountchange = Math.abs(missing_amount);
+    
+    //estimate fees for outputs size
+    //dummy transaction
+    var tx_dummy = new bitcoinjs.TransactionBuilder();
+    
+    var dummy_change_address = "";
+    var dummy_change_address_2 = "";
+    
+    if(account_single_private != '')
+    {
+        dummy_change_address = account_single_public_standard;
+        dummy_change_address_2 = account_single_public_segwit;
+    }
+    else
+    {
+        for (var i = 0; i < account_keys_legacy_change.length; i++)
+        {
+            var pub = account_keys_legacy_change[i]["public"];
+
+            if(typeof account_total_tx[pub] !== 'undefined')
+            {
+                dummy_change_address = pub;
+                break;
+            }
+        }
+        
+        for (var i = 0; i < account_keys_segwit_change.length; i++)
+        {
+            var pub = account_keys_segwit_change[i]["public"];
+
+            if(typeof account_total_tx[pub] !== 'undefined')
+            {
+                dummy_change_address_2 = pub;
+                break;
+            }
+        }
+    }
+    
+    if(dummy_change_address == "" || dummy_change_address_2 == "")
+    {
+        selected_utxo = [];
+        return false;
+    }
+    
+    try
+    {
+        keypair = [];
+        script_pub_key = [];
+        redeem_key = [];
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+            if(typeof keypair[selected_utxo[u].address] === "undefined")
+            {
+                keypair[selected_utxo[u].address] = bitcoinjs.ECPair.fromWIF(get_account_private_key(selected_utxo[u].address), bitcoinjs.networks.bitcoin);
+                
+                if(account_address_type[selected_utxo[u].address] == 0 || account_address_type[selected_utxo[u].address] == 3)
+                {
+                    //legacy
+                }
+                else if(account_address_type[selected_utxo[u].address] == 1 || account_address_type[selected_utxo[u].address] == 4)
+                {
+                    if(typeof script_pub_key[selected_utxo[u].address] === "undefined")
+                    {
+                       script_pub_key[selected_utxo[u].address] = bitcoinjs.payments.p2wpkh({ pubkey: keypair[selected_utxo[u].address].publicKey, network: bitcoinjs.networks.bitcoin }).output;
+                    }
+                }
+                else if(account_address_type[selected_utxo[u].address] == 2 || account_address_type[selected_utxo[u].address] == 5)
+                {
+                    if(typeof redeem_key[selected_utxo[u].address] === "undefined")
+                    {
+                        redeem_key[selected_utxo[u].address] = bitcoinjs.payments.p2sh({  redeem: bitcoinjs.payments.p2wpkh({ pubkey: keypair[selected_utxo[u].address].publicKey, network: bitcoinjs.networks.bitcoin }) });
+                    }
+                }
+            }
+        }
+    
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+            if(typeof script_pub_key[selected_utxo[u].address] !== 'undefined')
+            {
+                tx_dummy.addInput(selected_utxo[u].txid, selected_utxo[u].vout, null, script_pub_key[selected_utxo[u].address]);
+            }
+            else
+            {
+                tx_dummy.addInput(selected_utxo[u].txid, selected_utxo[u].vout);
+            }
+        }
+        
+        tx_dummy.addOutput(dummy_change_address, Math.round(tx_bitcoinamount*100000000));
+        
+        if(tx_donationamount > 0)
+        {
+            tx_dummy.addOutput(donation_address, Math.round(tx_donationamount*100000000));
+        }
+        
+        if(tx_amountchange > 0)
+        {
+            tx_dummy.addOutput(dummy_change_address_2, Math.round(tx_amountchange*100000000));
+        }
+
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+            if(typeof redeem_key[selected_utxo[u].address] !== "undefined")
+            {
+                tx_dummy.sign(u, keypair[selected_utxo[u].address], redeem_key[selected_utxo[u].address].redeem.output, null, parseInt(selected_utxo[u].value), null);
+            }
+            else if(typeof script_pub_key[selected_utxo[u].address] !== "undefined")
+            {
+                tx_dummy.sign(u, keypair[selected_utxo[u].address], null, null, parseInt(selected_utxo[u].value), null);
+            }
+            else
+            {
+                tx_dummy.sign(u, keypair[selected_utxo[u].address]);
+            }
+        }
+    }
+    catch(e)
+    {   
+        console.log(e);
+        selected_utxo = [];
+        return false;
+    }
+   
+    tx_built = tx_dummy.build();
+
+    if(added_fee == 0)
+    {
+        final_virtual_size = tx_built.virtualSize();
+        if(estimated_fee <= 0 || final_virtual_size <= 0)
+        {
+            console.log("fee error");
+            selected_utxo = [];
+            return false;
+        }
+        final_virtual_size *= 1.03;
+        
+        if(payment_request_fee > 0)
+        {
+            slow_added_fee = ((final_virtual_size/1000)*estimated_fee);
+            regular_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.05;
+            priority_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.1;
+        }
+        else
+        {
+            slow_added_fee = ((final_virtual_size/1000)*estimated_fee)*0.8;
+            regular_added_fee = (final_virtual_size/1000)*estimated_fee;
+            priority_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.1;
+        }
+        
+        if(bitcoinamount <= priority_added_fee)
+        {
+            $("#priority_fee").text("Priority 0.00000000 BTC");
+            $("#regular_fee").text("Regular 0.00000000 BTC");
+            $("#slow_fee").text("Slow 0.00000000 BTC");
+            exceeded_spendable = true;
+            selected_utxo = [];
+            return false;
+        }
+        
+        //update fee text
+        $("#priority_fee").text("Priority " + priority_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        $("#regular_fee").text("Regular " + regular_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        $("#slow_fee").text("Slow " + slow_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        
+        var feetype_select = document.getElementById('feetype');
+        var selected_feetype = feetype_select.options[feetype_select.selectedIndex].value; 
+        
+        if(priority_added_fee > 0 && regular_added_fee > 0 && slow_added_fee > 0)
+        {
+            if(selected_feetype == "priority")
+            {
+                if(sending_max == true)
+                {
+                    $("#btc-amount-input").val((bitcoinamount-priority_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    verifybtcamount(true);
+                }
+                update_selected_outputs(priority_added_fee, sending_max, false);
+            }
+            else if(selected_feetype == "regular")
+            {
+                if(sending_max == true)
+                {
+                    $("#btc-amount-input").val((bitcoinamount-regular_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    verifybtcamount(true);
+                }
+                update_selected_outputs(regular_added_fee, sending_max, false);
+            }
+            else if(selected_feetype == "slow")
+            {
+                if(sending_max == true)
+                {
+                    $("#btc-amount-input").val((bitcoinamount-slow_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    verifybtcamount(true);
+                }
+                update_selected_outputs(slow_added_fee, sending_max, false);
+            }
+        }
+        else
+        {
+            selected_utxo = [];
+        }
+        return false;
+    }
+    
+    tx_amountfees = added_fee;
+    
+    transaction_ready = true;
+    
+    return true;
+}
+update_selected_outputs();
+
+var send_btn_last = "";
+var send_is_loading = 0;
+
+function send_start_loading()
+{ 
+    if(send_is_loading == 0)
+    {
+      $('#loading-page').show();
+      var send_btn = $('#send-btn');
+      send_btn_last = send_btn.html();
+      send_btn.html("<img src=\"img/loading-button.svg\">");
+      send_is_loading = 1;
+    }
+}
+
+function send_stop_loading(success=false)
+{
+    if(send_is_loading == 1)
+    {
+        $('#loading-page').hide();
+     if(success==true)
+     {
+         clear_send_fields();
+      }
+      var send_btn = $('#send-btn');
+      send_btn.html(send_btn_last);
+      send_is_loading = 0;
+    }
+}
+
+function confirm_tx()
+{
+    transaction_confirmed = true;
+    send_check_1();
+}
+
+function send_check_1()
+{
+    if(exceeded_spendable == true)
+    {
+        transaction_confirmed = false;
+        alert("Not enough spendable balance");
+        return false;
+    }
+    
+    bitcoinaddress = $("#bitcoinaddress").val();
+    
+    if(bitcoinaddress == "")
+    {
+        transaction_confirmed = false;
+        return false;
+    }
+    
+    if(!ispublickeyvalid(bitcoinaddress))
+    {
+        transaction_confirmed = false;
+        alert("Invalid Bitcoin Address");
+        return false;
+    }
+    
+    if(transaction_ready == false)
+    {
+        transaction_confirmed = false;
+        alert("Transaction Error");
+        return false;
+    }
+
+    if(selected_utxo.length <= 0)
+    {
+        transaction_confirmed = false;
+        alert("Invalid Information");
+        return false;
+    }
+    
+    if(transaction_ready == true && transaction_confirmed == false)
+    {
+       usd_amount = (parseFloat(tx_bitcoinamount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+       $('#tx-send-value').html('<strong style="color: #616161;">' + tx_bitcoinamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC</strong> (' + selected_currency_left[selected_currency] + usd_amount + ' ' + selected_currency + ')');
+       
+       $('#tx-send-address').html('<strong>' + bitcoinaddress + '</strong>');
+       
+       $('#tx-send-fee').html(tx_amountfees.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+       
+       if(tx_donationamount > 0)
+       {
+        $('#donation-send-box').show();
+        $('#tx-send-donation').html(tx_donationamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+       }
+       else
+       {
+        $('#donation-send-box').hide();
+       }
+    
+        $('#tx-send-btn').html('SEND ' + tx_bitcoinamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+
+       $('.home__modal-welcome').arcticmodal();
+       
+       return false;
+    }
+    
+    if(!address_exists(bitcoinaddress))
+    {
+        balance_modifier = 0 - (tx_bitcoinamount + tx_donationamount + tx_amountfees);
+    }
+    else
+    {
+        balance_modifier = 0 - (tx_donationamount + tx_amountfees);
+    }
+    
+    send_start_loading();
+   
+    //detect top addresses types
+    total_legacy = 0;
+    total_legacy_compressed = 0;
+    total_segwit = 0;
+    total_p2sh = 0;
+    for(var u = 0; u < selected_utxo.length; u++)
+    {
+        if(account_address_type[selected_utxo[u].address] == 0 || account_address_type[selected_utxo[u].address] == 3)
+        {
+            if(account_single_private != "")
+            {
+                if(selected_utxo[u].address == account_single_public_standard_compressed)
+                {
+                    total_legacy_compressed++;
+                }
+            }
+            total_legacy++;
+        }
+        else if(account_address_type[selected_utxo[u].address] == 1 || account_address_type[selected_utxo[u].address] == 4)
+        {
+            total_segwit++;
+        }
+        else if(account_address_type[selected_utxo[u].address] == 2 || account_address_type[selected_utxo[u].address] == 5)
+        {
+            total_p2sh++;
+        }
+    }
+    
+    legacy_change = "";
+    segwit_change = "";
+    p2sh_change = "";
+    
+    if(account_single_private != "")
+    {
+        if(total_legacy_compressed > 0)
+        {
+            legacy_change = account_single_public_standard_compressed;
+        }
+        else
+        {
+            legacy_change = account_single_public_standard;
+        }
+        segwit_change = account_single_public_segwit;
+        p2sh_change = account_single_public_p2sh;
+    }
+    else
+    {
+        for (var i = 0; i < account_keys_legacy_change.length; i++)
+        {
+            var pub = account_keys_legacy_change[i]["public"];
+
+            if(typeof account_total_tx[pub] !== 'undefined')
+            {
+                if(account_total_tx[pub] == 0)
+                {
+                    legacy_change = pub;
+                    break;
+                }
+            }
+        }
+        
+        for (var i = 0; i < account_keys_segwit_change.length; i++)
+        {
+            var pub = account_keys_segwit_change[i]["public"];
+
+            if(typeof account_total_tx[pub] !== 'undefined')
+            {
+                if(account_total_tx[pub] == 0)
+                {
+                    segwit_change = pub;
+                    break;
+                }
+            }
+        }
+        
+        for (var i = 0; i < account_keys_p2sh_change.length; i++)
+        {
+            var pub = account_keys_p2sh_change[i]["public"];
+
+            if(typeof account_total_tx[pub] !== 'undefined')
+            {
+                if(account_total_tx[pub] == 0)
+                {
+                    p2sh_change = pub;
+                    break;
+                }
+            }
+        }
+    }
+    
+    final_change_address = "";
+    
+    //select change address
+    if(total_legacy > total_segwit && total_legacy > total_p2sh)
+    {
+        final_change_address = legacy_change;
+        gen_new_address_type = 3;
+    }
+    else if(total_segwit > total_legacy && total_legacy > total_p2sh)
+    {
+        final_change_address = segwit_change;
+        gen_new_address_type = 4;
+    }
+    else if(total_p2sh > total_segwit && total_legacy > total_legacy)
+    {
+        final_change_address = p2sh_change;
+        gen_new_address_type = 5;
+    }
+    else
+    {
+        if(total_legacy > 0)
+        {
+            final_change_address = legacy_change;
+            gen_new_address_type = 3;
+        }
+        else if(total_segwit > 0)
+        {
+            final_change_address = segwit_change;
+            gen_new_address_type = 4;
+        }
+        else if(total_p2sh > 0)
+        {
+            final_change_address = p2sh_change;
+            gen_new_address_type = 5;
+        }
+        else
+        {
+            send_stop_loading();
+            alert("Unknown error");
+            return false;
+        }
+    }
+    
+    if(final_change_address == "")
+    {
+        send_stop_loading();
+        alert("Unknown error");
+        return false;
+    }
+    
+    gen_new_address_xid = final_change_address;
+    
+    var tx = new bitcoinjs.TransactionBuilder();
+       
+    try
+    {
+        keypair = [];
+        script_pub_key = [];
+        redeem_key = [];
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+            if(typeof keypair[selected_utxo[u].address] === "undefined")
+            {
+                keypair[selected_utxo[u].address] = bitcoinjs.ECPair.fromWIF(get_account_private_key(selected_utxo[u].address), bitcoinjs.networks.bitcoin);
+                
+                if(account_address_type[selected_utxo[u].address] == 0 || account_address_type[selected_utxo[u].address] == 3)
+                {
+                    //legacy
+                }
+                else if(account_address_type[selected_utxo[u].address] == 1 || account_address_type[selected_utxo[u].address] == 4)
+                {
+                    if(typeof script_pub_key[selected_utxo[u].address] === "undefined")
+                    {
+                       script_pub_key[selected_utxo[u].address] = bitcoinjs.payments.p2wpkh({ pubkey: keypair[selected_utxo[u].address].publicKey, network: bitcoinjs.networks.bitcoin }).output;
+                    }
+                }
+                else if(account_address_type[selected_utxo[u].address] == 2 || account_address_type[selected_utxo[u].address] == 5)
+                {
+                    if(typeof redeem_key[selected_utxo[u].address] === "undefined")
+                    {
+                        redeem_key[selected_utxo[u].address] = bitcoinjs.payments.p2sh({  redeem: bitcoinjs.payments.p2wpkh({ pubkey: keypair[selected_utxo[u].address].publicKey, network: bitcoinjs.networks.bitcoin }) });
+                    }
+                }
+            }
+        }
+            
+    
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+            if(typeof script_pub_key[selected_utxo[u].address] !== 'undefined')
+            {
+                tx.addInput(selected_utxo[u].txid, selected_utxo[u].vout, null, script_pub_key[selected_utxo[u].address]);
+            }
+            else
+            {
+                tx.addInput(selected_utxo[u].txid, selected_utxo[u].vout);
+            }
+        }
+        
+        tx.addOutput(bitcoinaddress, Math.round(tx_bitcoinamount*100000000));
+        
+        if(tx_donationamount > 0)
+        {
+            tx.addOutput(donation_address, Math.round(tx_donationamount*100000000));
+        }
+        
+        if(tx_amountchange > 0)
+        {
+            tx.addOutput(final_change_address, Math.round(tx_amountchange*100000000));
+        }
+        else
+        {
+            gen_new_address_type = -1;
+        }
+
+        for(var u = 0; u < selected_utxo.length; u++)
+        {
+           if(typeof redeem_key[selected_utxo[u].address] !== "undefined")
+            {
+                tx.sign(u, keypair[selected_utxo[u].address], redeem_key[selected_utxo[u].address].redeem.output, null, parseInt(selected_utxo[u].value), null);
+            }
+            else if(typeof script_pub_key[selected_utxo[u].address] !== "undefined")
+            {
+                tx.sign(u, keypair[selected_utxo[u].address], null, null, parseInt(selected_utxo[u].value), null);
+            }
+            else
+            {
+                tx.sign(u, keypair[selected_utxo[u].address]);
+            }
+        }
+    }
+    catch(e)
+    {
+        send_stop_loading();
+        console.log(e);
+        alert("Unknown error");
+        return false;
+    }
+   
+    try
+    {
+        tx_hex = tx.build().toHex();
+        
+        $.ajax({
+            type: "POST",
+            url: '/send_tx.php',
+            data: {
+               session_id: account_session_id,
+               txhex: tx_hex
+            }
+        }).done(function(tx_result){
+                var re = /[0-9A-Fa-f]{6}/g;
+                
+                if(typeof tx_result.result !== 'undefined')
+                {
+                    if(re.test(tx_result.result))
+                    {
+                        var audio = new Audio('sent.mp3');
+                        audio.play();
+                        $("#transaction-sent-tx").text(tx_result.result);
+                        $("#transaction-sent-bx").show();
+                        force_update_balance();
+                        console.log("transaction sent");
+                        send_stop_loading(true);
+                        if(gen_new_address_type != -1)
+                        {
+                            if(account_single_private == '')
+                            {
+                                acc_num = 0;
+                                if(seed_type == "bip39")
+                                {
+                                    acc_num = account_bip39_number[gen_new_address_xid];
+                                    
+                                    if(acc_num >= total_bip39_accounts)
+                                    {
+                                        add_new_account_bip39();
+                                    }
+                                }
+                            
+                                process_create = get_address_index_valid_create_new(gen_new_address_xid);
+                                if(process_create == true)
+                                {
+                                    add_new_address_20(gen_new_address_type, acc_num);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        send_stop_loading();
+                         alert("Transaction Error 2");
+                    }
+                }
+                else
+                {
+                    send_stop_loading();
+                    console.log(tx_result);
+                    alert("Transaction Error 1");
+                }
+        }).fail(function()
+        {
+            send_stop_loading();
+            alert("Failed to submit transaction. Try again...");
+        });
+    }
+    catch(e)
+    {
+        send_stop_loading();
+        console.log(e);
+    }
+    
+    return false;
+}
+</script>
+	<main class="main def-page account account-send">
+		<div class="container">
+			<div class="row">
+				<div class="account__block">
+					<div class="account__top-wrap">
+						<div class="account__block-title">Send Bitcoin</div>
+					</div>
+                    <div id="video-qr" style="text-align: center; display: none;">
+                    <video id="preview-video-qr"></video>
+                    </div>
+                    <div id="note-request" style="display: none; text-align: left; margin-bottom:30px; font-size: 11px; color:#fe3dbe;font-weight: bold;">
+                    </div>
+                    <div id="transaction-sent-bx" style="text-align: center; margin-bottom: 30px; display: none;">
+                    <div style="display: block;">
+                    <img style="display: inline-block;" src="img/checkmark.svg" width="12px" height="12px">
+                    <span style="display: inline-block; color: #5be131; font-size: 15px;"></span>
+                    </div>
+                    <span id="transaction-sent-tx" style="display: block; text-decoration: underline; color: #2796f6; font-size: 11px;"></span>
+                    </div>
+					<form action="/" method="POST" onsubmit="return send_check_1()">
+						<div class="form__label">
+							<span class="account__label-text form__label-text">Receiver Address:</span>
+							<div class="account__row">
+								<div class="account__wrap-for-copy wrap-for-copy">
+									<input id="bitcoinaddress" class="form__text-input" type="text" placeholder="Enter Bitcoin Address, Scan QR or Paste BitPay Link" oninput="decode_bitcoin_address()">
+									<script>
+                                    var qr_video_enabled = false;
+                                    var qr_scanner = null;
+                                    function enable_qr_camera()
+                                    {
+                                        if(qr_video_enabled == false)
+                                        {
+                                            qr_scanner = new Instascan.Scanner({ video: document.getElementById('preview-video-qr') });
+                                          qr_scanner.addListener('scan', function (content) {
+                                            if(content.indexOf("bitcoin:") == 0)
+                                            {
+                                                try
+                                                {
+                                                    decoded_value = bitcoinjs.bip21.decode(content);
+                                                    $("#bitcoinaddress").val(decoded_value.address);
+                                                    if(typeof decoded_value.options !== 'undefined')
+                                                    {
+                                                        if(typeof decoded_value.options.amount !== 'undefined')
+                                                        {
+                                                            $("#btc-amount-input").val((decoded_value.options.amount).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                                                            verifybtcamount();
+                                                        }
+                                                    }
+                                                    enable_qr_camera();
+                                                }
+                                                catch(e)
+                                                {
+                                                
+                                                }
+                                            }
+                                          });
+                                          Instascan.Camera.getCameras().then(function (cameras) {
+                                            if (cameras.length > 0) {
+                                                $('#video-qr').show();
+                                              qr_video_enabled = true;
+                                              qr_scanner.start(cameras[0]);
+                                            } else {
+                                              console.error('No cameras found.');
+                                            }
+                                          }).catch(function (e) {
+                                            console.error(e);
+                                          });
+                                      }
+                                      else
+                                      {
+                                        qr_scanner.stop();
+                                        qr_video_enabled = false;
+                                        qr_scanner = null;
+                                         $('#video-qr').hide();
+                                      }
+                                    }
+                                    </script>
+                                    <span class="btn-qr" onclick="enable_qr_camera()"></span>
+								</div>
+								<span id="payment-request-btn" class="account__btn-bitpay btn-reset">BITPAY</span>
+							</div>
+						</div>
+						<div class="form__label">
+							<label class="form__label-text account__label-text" style="display:inline-block; width: 50%;" for="btc-amount">BTC Amount:</label>
+                            <label id="usdtext_send" class="form__label-text account__label-text" style="display:inline-block; width: 50%; padding-left: 17px;" for="usd-amount"></label>
+                            <script>
+                            $("#usdtext_send").text(selected_currency + " (" + selected_currency_left[selected_currency] + ")");
+                            </script>
+							<div class="label__row">
+								<div class="label__left-col">
+                                    <div class="account__wrap-for-copy wrap-for-copy">
+									<input class="form__text-input form__text-input--btc" id="btc-amount-input" oninput="verifybtcamount()" type="text" name="btc-amount" placeholder="0">
+                                    <span class="btn-max" style="text-align:center; line-height:50px; font-size:10px" onclick="setmax()">Max</span>
+                                    </div>
+                                </div>
+								<div class="label__right-col label__right-col--arrow">
+									<input class="form__text-input form__text-input--usd" id="usd-amount-input" oninput="verifyusdamount()" type="text" name="usd-amount" placeholder="0">
+								</div>
+							</div>
+						</div>
+						<div class="form__label">
+							<div class="label__row">
+								<div class="label__left-col">
+									<label class="form__label-text account__label-text" for="btc-priority">Transaction Fee:</label>
+									<select id="feetype" class="form__select" id="btc-priority" name="btc-priority" onchange="update_selected_outputs_changes()">
+                                        <option id="priority_fee" value="priority">Priority 0.00000000 BTC</option>
+                                        <option id="regular_fee" value="regular">Regular 0.00000000 BTC</option>
+                                        <option id="slow_fee" value="slow">Slow 0.00000000 BTC</option>
+									</select>
+								</div>
+								<div class="label__right-col">
+									<label id="support-btn" class="account__checkbox account__checkbox--position form__checkbox">
+										<input class="account__checkbox-input form__checkbox-input" id="account-option-support-bitamp" type="checkbox" name="account-option-support-bitamp">
+										<span class="form__checkbox-box"></span>
+										<span class="form__checkbox-label">Support Bitamp</span>
+									</label>
+									<label class="form__text-input--hide">
+										<span class="account__label-text form__label-text">Donation Amount:</span>
+										<input class="form__text-input form__text-input--btc" id="donation-amount" type="text" name="donation-amount" oninput="verifydonationamount()" placeholder="0.00" value="0.00">
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form__wrap-btns account__wrap-btns">
+							<input id="reset-button-send" class="form__btn-reset btn-reset" type="reset" value="CLEAR" onclick="clear_send_fields()">
+							<button id="send-btn" class="btn-active">SEND BTC</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</main>
+    <script>
+    function verifybtcamount(skipupdate=false)
+    {
+        $('#btc-amount-input').removeClass("overlimitval");
+        var check_amount = $("#btc-amount-input").val();
+        var check_amount_valid = 1;
+        var last_char;
+        var total_dots = 0;
+        if(check_amount.length > 0)
+        {
+            last_char = check_amount.substr(check_amount.length - 1);
+        }
+        
+        if(check_amount.length == 0)
+        {
+            check_amount_valid = 0;
+        }
+        else if(check_amount.length > 17)
+        {
+            check_amount_valid = 0;
+        }
+        else
+        {
+            for(var v = 0; v < check_amount.length; v++)
+            {
+                if(check_amount[v] >= '0' && check_amount[v] <= '9')
+                {
+                    
+                }
+                else if(check_amount[v] == '.')
+                {
+                    if(total_dots == 0)
+                    {
+                        total_dots++;
+                    }
+                    else
+                    {
+                        check_amount_valid = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    check_amount_valid = 0;
+                    break;
+                }
+            }
+        }
+        if(check_amount_valid == 0)
+        {
+            $("#btc-amount-input").val("");
+            $("#usd-amount-input").val("");
+        }
+        else
+        {
+            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
+            $("#usd-amount-input").val(usd_amount);
+        }
+        if(skipupdate == false)
+        {
+          update_selected_outputs();
+        }
+    }
+    
+    function verifydonationamount()
+    {
+        $('#donation-amount').removeClass("overlimitval");
+        var check_amount = $("#donation-amount").val();
+        var check_amount_valid = 1;
+        var last_char;
+        var total_dots = 0;
+        if(check_amount.length > 0)
+        {
+            last_char = check_amount.substr(check_amount.length - 1);
+        }
+        
+        if(check_amount.length == 0)
+        {
+            check_amount_valid = 0;
+        }
+        else if(check_amount.length > 17)
+        {
+            check_amount_valid = 0;
+        }
+        else
+        {
+            for(var v = 0; v < check_amount.length; v++)
+            {
+                if(check_amount[v] >= '0' && check_amount[v] <= '9')
+                {
+                    
+                }
+                else if(check_amount[v] == '.')
+                {
+                    if(total_dots == 0)
+                    {
+                        total_dots++;
+                    }
+                    else
+                    {
+                        check_amount_valid = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    check_amount_valid = 0;
+                    break;
+                }
+            }
+        }
+        if(check_amount_valid == 0)
+        {
+            $("#donation-amount").val("");
+        }
+        update_selected_outputs();
+    }
+    
+    function verifyusdamount()
+    {
+        var check_amount = $("#usd-amount-input").val();
+        var check_amount_valid = 1;
+        var last_char;
+        var total_dots = 0;
+        if(check_amount.length > 0)
+        {
+            last_char = check_amount.substr(check_amount.length - 1);
+        }
+        
+        if(check_amount.length == 0)
+        {
+            check_amount_valid = 0;
+        }
+        else
+        {
+            for(var v = 0; v < check_amount.length; v++)
+            {
+                if(check_amount[v] >= '0' && check_amount[v] <= '9')
+                {
+                    
+                }
+                else if(check_amount[v] == '.')
+                {
+                    if(total_dots == 0)
+                    {
+                        total_dots++;
+                    }
+                    else
+                    {
+                        check_amount_valid = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    check_amount_valid = 0;
+                    break;
+                }
+            }
+        }
+        if(check_amount_valid == 0)
+        {
+            $("#btc-amount-input").val("");
+            $("#usd-amount-input").val("");
+        }
+        else
+        {
+            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
+            $("#btc-amount-input").val(btc_amount);
+        }
+        update_selected_outputs();
+    }
+    </script>
+	<!-- box-modal -->
+		<div id="confirm-send-box" style="position:fixed; top:50%; left: 50%; margin-top: -200px; margin-left: -375px; z-index:9999; display: none;">
+			<div class="home__modal-welcome box-modal modal-bg-pattern" style="font-family: 'Roboto', sans-serif;">
+				<div class="box-modal__close arcticmodal-close"></div>
+				<ul class="box-modal__alt-list def-list-zero" style="z-index: 5;">
+                    <li class="box-modal__alt-item" style="margin-bottom: 20px;">
+						<div class="box-modal__col" style="z-index: 5"><h4 style="color:#287df5">Verify Transaction</h4></div>
+					</li>
+					<li class="box-modal__alt-item">
+						<div class="box-modal__col" style="z-index: 5; margin-right: 7px; width: 125px;">Bitcoin Amount:</div>
+						<div id="tx-send-value" class="box-modal__col" style="z-index: 5;"></div>
+					</li>
+					<li class="box-modal__alt-item">
+						<div class="box-modal__col" style="z-index: 5; margin-right: 7px; width: 125px;">Receiving Address:</div>
+						<div id="tx-send-address"class="box-modal__col" style="z-index: 5;"></div>
+					</li>
+					<li class="box-modal__alt-item">
+						<div class="box-modal__col" style="z-index: 5; margin-right: 7px; width: 125px;">Transaction Fee:</div>
+						<div id="tx-send-fee" class="box-modal__col" style="z-index: 5; font-size: 13px;"></div>
+					</li>
+                    <li id="donation-send-box" class="box-modal__alt-item">
+						<div class="box-modal__col" style="z-index: 5; margin-right: 7px; width: 125px;">Your Donation:</div>
+						<div id="tx-send-donation" class="box-modal__col" style="color: #39de5e; z-index: 5; font-size: 13px;"></div>
+					</li>
+				</ul>
+                <button class="btn-reset arcticmodal-close" style="display: inline-block; width: 25%; z-index:5; padding-right: 5px; padding-left: 5px;">CANCEL</button>
+				<button id="tx-send-btn" class="btn-active arcticmodal-close" style="display: inline-block; width: 68%; z-index:5;" onclick="confirm_tx()"></button>
+			</div>
+		</div>
+<?php
+	require_once 'footer-account.html';
+?>

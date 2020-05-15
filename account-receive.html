@@ -1,0 +1,476 @@
+<?php
+$page = "account-receive";
+	require_once 'header-account.html';
+?>
+<script>
+page_name = "account-receive";
+</script>
+<script>
+document.title = "Receive Bitcoins - Bitamp";
+$("#header-top-title").text("Receive Bitcoin");
+$("#header-top-description").text("Share your public address below to receive Bitcoin.");
+</script>
+	<main class="main def-page account account-receive">
+		<div class="container">
+			<div class="row">
+				<div class="account__block">
+					<div class="account__top-wrap">
+						<div class="account__block-title">Receive Bitcoin</div>
+					</div>
+					<div class="account__row">
+						<div class="account__left-col">
+							<div class="form__label">
+								<div class="form__label-text account__label-text">Copy & Share Address:</div>
+								<div class="wrap-for-copy account__wrap-for-copy">
+									<select id="receive-address" onchange="update_selected_receive_address();"></select>
+								</div>
+							</div>
+							<div class="border__or"></div>
+							<div class="form__label">
+								<label class="form__label-text account__label-text" style="display:inline-block; width: 50%;" for="btc-amount">Enter amount:</label>
+                                <label id="usdtext_recv" class="form__label-text account__label-text" style="display:inline-block; width: 50%; padding-left: 17px;" for="usd-amount"></label>
+                                <script>
+                                $("#usdtext_recv").text(selected_currency + " (" + selected_currency_left[selected_currency] + ")");
+                                </script>
+								<div class="label__row">
+									<div class="label__left-col">
+										<input id="btc-amount-input" oninput="verifybtcamount()" class="form__text-input form__text-input--btc form__text-input--btc" id="btc-amount" type="text" name="btc-amount" placeholder="0">
+									</div>
+									<div class="label__right-col label__right-col--arrow">
+										<input id="usd-amount-input" oninput="verifyusdamount()" class="form__text-input form__text-input--usd" id="btc-amount" type="text" name="btc-amount" placeholder="0">
+									</div>
+								</div>
+							</div>
+							<label class="form__label">
+								<span class="form__label-text">Description:</span>
+								<textarea id="btc-message" class="form__textarea form__textarea--description" placeholder="What’s this transaction for?" oninput="update_selected_receive_address()"></textarea>
+							</label>
+						</div>
+						<div class="account__right-col account__mob-right-col">
+							<div class="account__receive-qr">
+								 <div id="qrcode-receive"></div>
+							</div>
+							<div class="wrap-for-copy account__wrap-for-copy">
+								<div class="form__label-text account__label-text">Copy Address</div>
+								<input id="address-receive" class="form__text-input" value="" readonly>
+								<span id="copy-recv"></span>
+                                <script>
+                                document.getElementById("copy-recv").onclick = function(){ copy_input("address-receive"); };
+                                $("#copy-recv").addClass("copyready btn-copy");
+                                </script>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+    <script>
+    var qrcode_receive = new QRCode(document.getElementById("qrcode-receive"), {
+        text: "0",
+        width: 300,
+        height: 300,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+        });
+        
+            function update_selected_receive_address()
+    {
+       var receiveaddresslist_select = document.getElementById('receive-address');
+       var selected = receiveaddresslist_select.options[receiveaddresslist_select.selectedIndex].value; 
+
+       document.getElementById('address-receive').value = selected;
+
+       qrcode_receive.clear();
+       
+       var check_amount = $("#btc-amount-input").val();
+       var check_msg = $("#btc-message").val();
+       
+       var add_query = "";
+       var add_more = 0;
+       
+       if(check_amount != "" || check_msg != "")
+       {
+            add_query = "?";
+       }
+       
+       if(check_amount != "")
+       {
+            if(add_more == 1)
+            {
+               add_query += "&";
+            }
+            
+            add_query += "amount=" + check_amount;
+            
+            add_more = 1;
+       }
+       
+       if(check_msg != "")
+       {
+            if(add_more == 1)
+            {
+               add_query += "&";
+            }
+            
+            add_query += "message=" + encodeURI(check_msg);
+            
+            add_more = 1;
+       }
+       
+        qrcode_receive.makeCode("bitcoin:" + selected + add_query);
+        
+    }
+    function update_receive_address()
+    {
+        $('#receive-address').empty()
+        
+        var receiveaddresslist_select = document.getElementById('receive-address');
+            
+        if(account_single_private != '')
+        {
+            if(typeof account_total_tx[account_single_public_standard] !== 'undefined' && account_total_tx[account_single_public_standard] != 0)
+            {
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard;
+                receiveaddresslist_option.innerHTML = account_single_public_standard;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard_compressed;
+                receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_segwit;
+                receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_p2sh;
+                receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+            else if(typeof account_total_tx[account_single_public_standard_compressed] !== 'undefined' && account_total_tx[account_single_public_standard_compressed] != 0)
+            {
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard_compressed;
+                receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard;
+                receiveaddresslist_option.innerHTML = account_single_public_standard;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_segwit;
+                receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_p2sh;
+                receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+            else if(typeof account_total_tx[account_single_public_segwit] !== 'undefined' && account_total_tx[account_single_public_segwit] != 0)
+            {
+            
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_segwit;
+                receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard;
+                receiveaddresslist_option.innerHTML = account_single_public_standard;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard_compressed;
+                receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                                                          
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_p2sh;
+                receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+            else if(typeof account_total_tx[account_single_public_p2sh] !== 'undefined' && account_total_tx[account_single_public_p2sh] != 0)
+            {
+            
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_p2sh;
+                receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard;
+                receiveaddresslist_option.innerHTML = account_single_public_standard;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard_compressed;
+                receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_segwit;
+                receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+
+            }
+            else
+            {
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard;
+                receiveaddresslist_option.innerHTML = account_single_public_standard;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_standard_compressed;
+                receiveaddresslist_option.innerHTML = account_single_public_standard_compressed;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_segwit;
+                receiveaddresslist_option.innerHTML = account_single_public_segwit;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                
+                receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = account_single_public_p2sh;
+                receiveaddresslist_option.innerHTML = account_single_public_p2sh;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+        }
+        else 
+        {
+            var receiveaddresslist_option = document.createElement('option');
+            
+            var foundnone = 1;
+            for (var i = 0; i < account_keys_legacy.length; i++)
+            {
+                var pub = account_keys_legacy[i]["public"];
+                
+                if(typeof account_total_tx[pub] === 'undefined')
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+                else if(account_total_tx[pub] == 0)
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+            }
+            
+            if(found_none == 1)
+            {
+                var pub = account_keys_legacy[account_keys_legacy.length-1]["public"];
+                var receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = pub;
+                receiveaddresslist_option.innerHTML = pub;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+            
+            found_none = 1;
+            for (var i = 0; i < account_keys_segwit.length; i++)
+            {
+                var pub = account_keys_segwit[i]["public"];
+                
+                if(typeof account_total_tx[pub] === 'undefined')
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+                else if(account_total_tx[pub] == 0)
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+            }
+            
+             if(found_none == 1)
+            {
+                var pub = account_keys_segwit[account_keys_segwit.length-1]["public"];
+                var receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = pub;
+                receiveaddresslist_option.innerHTML = pub;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+            
+            found_none = 1;
+            for (var i = 0; i < account_keys_p2sh.length; i++)
+            {
+                var pub = account_keys_p2sh[i]["public"];
+                
+                if(typeof account_total_tx[pub] === 'undefined')
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+                else if(account_total_tx[pub] == 0)
+                {
+                    var receiveaddresslist_option = document.createElement('option');
+                    receiveaddresslist_option.value = pub;
+                    receiveaddresslist_option.innerHTML = pub;
+                    receiveaddresslist_select.appendChild(receiveaddresslist_option);
+                    found_none = 0;
+                    break;
+                }
+            }
+            
+            if(found_none == 1)
+            {
+                var pub = account_keys_p2sh[account_keys_p2sh.length-1]["public"];
+                var receiveaddresslist_option = document.createElement('option');
+                receiveaddresslist_option.value = pub;
+                receiveaddresslist_option.innerHTML = pub;
+                receiveaddresslist_select.appendChild(receiveaddresslist_option);
+            }
+                                        
+        }
+        
+        update_selected_receive_address();
+    }
+    update_receive_address();
+    
+    function verifybtcamount()
+    {
+        var check_amount = $("#btc-amount-input").val();
+        var check_amount_valid = 1;
+        var last_char;
+        var total_dots = 0;
+        if(check_amount.length > 0)
+        {
+            last_char = check_amount.substr(check_amount.length - 1);
+        }
+        
+        if(check_amount.length == 0)
+        {
+            check_amount_valid = 0;
+        }
+        else if(check_amount.length > 17)
+        {
+            check_amount_valid = 0;
+        }
+        else
+        {
+            for(var v = 0; v < check_amount.length; v++)
+            {
+                if(check_amount[v] >= '0' && check_amount[v] <= '9')
+                {
+                    
+                }
+                else if(check_amount[v] == '.')
+                {
+                    if(total_dots == 0)
+                    {
+                        total_dots++;
+                    }
+                    else
+                    {
+                        check_amount_valid = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    check_amount_valid = 0;
+                    break;
+                }
+            }
+        }
+        if(check_amount_valid == 0)
+        {
+            $("#btc-amount-input").val("");
+            $("#usd-amount-input").val("");
+        }
+        else
+        {
+            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
+            $("#usd-amount-input").val(usd_amount);
+        }
+        update_selected_receive_address();
+    }
+    
+    function verifyusdamount()
+    {
+        var check_amount = $("#usd-amount-input").val();
+        var check_amount_valid = 1;
+        var last_char;
+        var total_dots = 0;
+        if(check_amount.length > 0)
+        {
+            last_char = check_amount.substr(check_amount.length - 1);
+        }
+        
+        if(check_amount.length == 0)
+        {
+            check_amount_valid = 0;
+        }
+        else
+        {
+            for(var v = 0; v < check_amount.length; v++)
+            {
+                if(check_amount[v] >= '0' && check_amount[v] <= '9')
+                {
+                    
+                }
+                else if(check_amount[v] == '.')
+                {
+                    if(total_dots == 0)
+                    {
+                        total_dots++;
+                    }
+                    else
+                    {
+                        check_amount_valid = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    check_amount_valid = 0;
+                    break;
+                }
+            }
+        }
+        if(check_amount_valid == 0)
+        {
+            $("#btc-amount-input").val("");
+            $("#usd-amount-input").val("");
+        }
+        else
+        {
+            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
+            $("#btc-amount-input").val(btc_amount);
+        }
+        update_selected_receive_address();
+    }
+    </script>
+<?php
+	require_once 'footer-account.html';
+?>

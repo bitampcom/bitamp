@@ -1,0 +1,93 @@
+<?php
+$page = "account-info";
+?>
+<script>
+document.title = "Private Account Info - Bitamp";
+
+$("#header-top-title").text("Account Details");
+$("#header-top-description").text("Your private account information listed below.");
+</script>
+<div id="print-display" style="display: none;">
+  <img src="img/logo.png" alt="Bitamp" style="position: relative; display: block; margin: auto;">
+  <p readonly="" id="print-display-seed" style="color: #53658c; border-color: #c3cbe7; background-color: #eff0f3; padding: 35px; font-size: 22px; font-family: Arial, Helvetica, sans-serif;"></p>
+    <ul style="color: #000">
+        <li id="bip39-print">This is a <strong>BIP39</strong> seed.</li>
+        <li>Store your printed seed in a safe & secure place.</li>
+        <li>Seeds are not stored on our servers, they cannot be recovered if lost.</li>
+        <li>Login with your seed by going to <strong>www.bitamp.com</strong></li>
+    </ul>
+</div>
+<?php
+	require_once 'header-account.html';
+?>
+	<main class="main def-page account">
+		<div class="container">
+			<div class="row">
+				<div class="account__block">
+					<div class="account__row-line">
+						<div class="account__top-wrap">
+							<div class="account__block-title">Your Private Information</div>
+						</div>
+                        <div id="seed_account" class="home__form">
+                        <div class="donate__label">Seed Words:</div>
+                        
+                        <div class="form__label wrap-for-copy-print form__label--mob-for-generate">
+                            <div class="form__nav-options-wrap" style="margin-bottom: 0px;">
+                                <textarea class="form__textarea" id="ploginkeyseed" style="color: #404755; border-color: #d8dbe5; background-color: #f4f4f7;" readonly=""></textarea>
+                            </div>
+                            <span id="cpy-seed" class="btn-copy"></span>
+                            <span class="btn-print" onclick="window.print();"></span>
+                            <script>
+                            document.getElementById("cpy-seed").onclick = function(){ copy_input("ploginkeyseed"); };
+                            $("#cpy-seed").addClass("copyready");
+                            </script>
+                        </div>
+                        </div>
+                        
+                        <div id="pkey_account">
+						<div class="donate__label">[UNCOMPRESSED] Private Key:</div>
+						<div class="wrap-for-copy">
+							<input id="ploginkey" class="donate__input form__text-input" value="" readonly>
+							<span id="cpy-uncompressed" class="btn-copy"></span>
+                            <script>
+                            document.getElementById("cpy-uncompressed").onclick = function(){ copy_input("ploginkey"); };
+                            $("#cpy-uncompressed").addClass("copyready");
+                            </script>
+						</div>
+                        
+                        <div class="donate__label" style="margin-top: 25px;">[COMPRESSED] Private Key:</div>
+						<div class="wrap-for-copy">
+							<input id="ploginkeycompressed" class="donate__input form__text-input" value="" readonly>
+							<span id="cpy-compressed" class="btn-copy"></span>
+                            <script>
+                            document.getElementById("cpy-compressed").onclick = function(){ copy_input("ploginkeycompressed"); };
+                            $("#cpy-compressed").addClass("copyready");
+                            </script>
+						</div>
+                        </div>
+                        <script>
+                        if(account_seed != '')
+                        {
+                            $("#pkey_account").hide();
+                            if(total_bip39_accounts == 0)
+                            {
+                                $('#bip39-print').hide();
+                            }
+                            document.getElementById("ploginkeyseed").value = account_seed;
+                            $("#print-display-seed").text(account_seed);
+                        }
+                        else
+                        {
+                            $("#seed_account").hide();
+                            document.getElementById("ploginkey").value = account_single_private;
+                            document.getElementById("ploginkeycompressed").value = account_single_private_compressed;
+                        }
+                        </script>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+<?php
+	require_once 'footer-account.html';
+?>
