@@ -312,6 +312,12 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
         return false;
     }
     
+    if(unspent_outputs === 'undefined')
+    {
+        selected_utxo = [];
+        return false;
+    }
+    
     if(unspent_outputs.length == 0)
     {
         selected_utxo = [];
