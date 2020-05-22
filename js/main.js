@@ -2149,7 +2149,7 @@ function bitamp_verifylogin_create()
     
     if(confirm_seed != val_seed)
     {
-        alert("Please, write down and confirm your seed correctly!");
+        $('#seed-confirm-error').show();
         return false;
     }
     
@@ -2167,7 +2167,7 @@ function bitamp_verifylogin_create()
             else
             {
                 create_stop_loading();
-                alert("Seed error.");
+                $('#seed-confirm-error').show();
             }
         });
     }
@@ -2203,7 +2203,7 @@ function bitamp_verifylogin()
             else
             {
                 login_stop_loading();
-                alert("Invalid seed.");
+                $('#seed-login-error').show();
             }
         });
     }
@@ -2213,67 +2213,77 @@ function bitamp_verifylogin()
         {
             if(val_pkey_pass == '')
             {
-                alert("missing passphrase");
+                $('#bip38-login-error').show();
                 return false;
             }
             
-            Promise.resolve(bitcoinjs.bip38.decrypt(val_pkey, val_pkey_pass)).then(decrypted_key =>
+            try
             {
-                try
+                
+                Promise.resolve(bitcoinjs.bip38.decrypt(val_pkey, val_pkey_pass)).then(decrypted_key =>
                 {
-                    wif = bitcoinjs.wif.encode(0x80, decrypted_key.privateKey, decrypted_key.compressed);
-                    
-                    pkey_info = isprivatekeyvalid(wif);
-                    if(pkey_info[0] == true)
+                    try
                     {
-                        account_single_private = pkey_info[1];
-                        account_single_private_compressed = pkey_info[6];
+                        wif = bitcoinjs.wif.encode(0x80, decrypted_key.privateKey, decrypted_key.compressed);
                         
-                        account_single_public_standard = pkey_info[2];
-                        account_address_type[account_single_public_standard] = 0;
-                        
-                        account_keys_new.push({"private": account_single_private, "public": account_single_public_standard});
-                        
-                        account_single_public_standard_compressed = pkey_info[5];
-                        account_address_type[account_single_public_standard_compressed] = 0;
-                        
-                        account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_standard_compressed});
-                        
-                        account_single_public_segwit = pkey_info[3];
-                        account_address_type[account_single_public_segwit] = 1;
-                        
-                        account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_segwit});
-                        
-                        account_single_public_p2sh = pkey_info[4];
-                        account_address_type[account_single_public_p2sh] = 2;
-                        
-                        account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_p2sh});
-                        
-                        temp_account_session_id = account_single_public_standard + ":" + account_single_public_segwit + ":" + account_single_public_p2sh;
+                        pkey_info = isprivatekeyvalid(wif);
+                        if(pkey_info[0] == true)
+                        {
+                            account_single_private = pkey_info[1];
+                            account_single_private_compressed = pkey_info[6];
+                            
+                            account_single_public_standard = pkey_info[2];
+                            account_address_type[account_single_public_standard] = 0;
+                            
+                            account_keys_new.push({"private": account_single_private, "public": account_single_public_standard});
+                            
+                            account_single_public_standard_compressed = pkey_info[5];
+                            account_address_type[account_single_public_standard_compressed] = 0;
+                            
+                            account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_standard_compressed});
+                            
+                            account_single_public_segwit = pkey_info[3];
+                            account_address_type[account_single_public_segwit] = 1;
+                            
+                            account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_segwit});
+                            
+                            account_single_public_p2sh = pkey_info[4];
+                            account_address_type[account_single_public_p2sh] = 2;
+                            
+                            account_keys_new.push({"private": account_single_private_compressed, "public": account_single_public_p2sh});
+                            
+                            temp_account_session_id = account_single_public_standard + ":" + account_single_public_segwit + ":" + account_single_public_p2sh;
 
-                        account_session_id = temp_account_session_id;
+                            account_session_id = temp_account_session_id;
+                            
+                            signin_auth();
+                        }
+                        else
+                        {
+                            login_stop_loading();
+                            $('#pkey-login-error').show();
+                        }
                         
-                        signin_auth();
                     }
-                    else
+                    catch(e)
                     {
-                        login_stop_loading();
-                        alert("Invalid private key!");
+                       login_stop_loading();
+                       $('#pkey-login-error').show();
                     }
-                    
-                }
-                catch(e)
+                })
+                .catch(function(error)
                 {
-                   login_stop_loading();
-                   alert("Invalid private key!");
-                }
-            })
-            .catch(function(error)
+                    login_stop_loading();
+                    $('#bip38-login-error').show();
+                });
+            
+            }
+            catch(e)
             {
-                login_stop_loading();
-                alert("Invalid passphrase!");
-            });
-    
+               login_stop_loading();
+               $('#bip38-login-error').show();
+            }
+            
             return false;
         }
         pkey_info = isprivatekeyvalid(val_pkey);
@@ -2311,7 +2321,7 @@ function bitamp_verifylogin()
         else
         {
             login_stop_loading();
-            alert("Invalid private key!");
+            $('#pkey-login-error').show();
         }
     }
     else
@@ -2366,6 +2376,8 @@ function signin_auth()
 
 function bitamp_pkey_checkbip38()
 {
+    $('#pkey-login-error').hide();
+    $('#bip38-login-error').hide();
     login_private_key = $('#login-private-key');
     val_pkey = login_private_key.val().trim();
     option_private_key = $('#login-option-private-key');
