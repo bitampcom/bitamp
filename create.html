@@ -38,7 +38,7 @@ document.title = "Create Account - Generate New Seed - Bitamp";
 							<ul class="home__nav-tabs def-list-zero">
 								<li class="home__nav-item">
 									<button class="home__nav-btn">
-										<span class="home__nav-btn--login">Login</span>
+											<span class="home__nav-btn--login">Login</span>
 									</button>
 								</li>
 								<li class="home__nav-item">
@@ -49,7 +49,7 @@ document.title = "Create Account - Generate New Seed - Bitamp";
 							</ul>
 							<ul class="home__form-tabs def-list-zero">
 								<li class="home__form-tab">
-									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin()">
+									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin();">
                                         <div id="use-seed-key" style="display: none; padding-bottom: 25px;">
                                          <span style="text-decoration: underline; color: #57a8f1; cursor: pointer;">use a seed instead</span>
 										</div>
@@ -57,8 +57,9 @@ document.title = "Create Account - Generate New Seed - Bitamp";
 											<div class="form__nav-options-wrap form__nav-options-wrap--checkbox">
 												<label class="form__label-text" for="login-your-seed">Your Seed:</label>
 											</div>
-											<textarea class="form__textarea" id="login-your-seed" name="login-your-seed" placeholder="Enter your Seed here"></textarea>
-										</div>
+											<textarea class="form__textarea" id="login-your-seed" name="login-your-seed" placeholder="Enter your Seed here" oninput="$('#seed-login-error').hide()"></textarea>
+                                            <span id="seed-login-error" class="error__message" style="display: none;">Invalid Seed</span>
+                                        </div>
                                         <div id="use-private-key" style="display: none; padding-bottom: 25px;">
                                          <span style="text-decoration: underline; color: #57a8f1; cursor: pointer;">use a private key instead</span>
 										</div>
@@ -67,14 +68,16 @@ document.title = "Create Account - Generate New Seed - Bitamp";
 												<label class="form__label-text" for="login-private-key">Your Private Key:</label>
 											</div>
 											<input class="form__text-input" id="login-private-key" type="text" name="login-private-key" placeholder="Enter your Private Key here" oninput="bitamp_pkey_checkbip38()">
-										</div>
+                                            <span id="pkey-login-error" class="error__message" style="display: none;">Invalid Private Key</span>
+                                        </div>
 										<div class="form__label form__label--private-key-password hide">
 											<div class="form__nav-options-wrap form__nav-options-wrap--checkbox">
 												<label class="form__label-text" for="login-private-key">Enter your Private Key password:</label>
 											</div>
 											<span class="form__label-text"></span>
-											<input class="form__text-input" id="password-private-key" type="text" name="password-private-key" placeholder="Enter your Private Key here">
-										</div>
+											<input class="form__text-input" id="password-private-key" type="text" name="password-private-key" placeholder="Enter your Private Key here" oninput="$('#bip38-login-error').hide()">
+                                            <span id="bip38-login-error" class="error__message" style="display: none;">Invalid Private Key Password</span>
+                                        </div>
 										<div class="form__wrap-btns">
 											<input id="user-reset-btn" class="form__btn-reset btn-reset" type="reset" value="CLEAR">
 											<button id="login-btn" class="btn-active">Login to your account</button>
@@ -82,7 +85,7 @@ document.title = "Create Account - Generate New Seed - Bitamp";
 									</form>
 								</li>
 								<li class="home__form-tab">
-									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin_create()">
+									<form class="home__form" action="/" method="POST" onsubmit="return bitamp_verifylogin_create();">
 										<div class="form__label wrap-for-copy-print form__label--mob-for-generate">
 											<div class="form__nav-options-wrap">
 												<label class="form__label-text" for="create-wallet-your-seed">Your Seed:</label>
@@ -105,8 +108,8 @@ document.title = "Create Account - Generate New Seed - Bitamp";
                                                         document.getElementById("create-wallet-your-seed").innerHTML = seed;
                                                         document.getElementById("copy-seed-btn").onclick = function(){ app_seed_copy(); };
                                                         $("#copy-seed-btn").addClass("copyready");
-                                                        $("#print-display-seed").text(seed);
-                                                        // mnemonic_to_seed(seed);
+                                                         $("#print-display-seed").text(seed);
+                                                         //mnemonic_to_seed(seed);
                                                     }
                                                     create_stop_loading();
                                                 }
@@ -140,15 +143,15 @@ document.title = "Create Account - Generate New Seed - Bitamp";
                                                     copyseed.setSelectionRange(0, 99999);
                                                     document.execCommand("copy");
                                                 }
-                                            app_gen_seed();
+                                                app_gen_seed();
                                             </script>
 											<span id="copy-seed-btn" class="btn-copy" onclick="app_seed_copy();"></span>
 											<span class="btn-print" onclick="window.print();"></span>
 										</div>
 										<label id="seedentrylabel" class="form__label">
 											<span class="form__label-text">Seed Confirmation:</span>
-											<textarea class="form__textarea" id="create-wallet-confirm-your-seed" name="create-wallet-confirm-your-seed" placeholder="Type your Seed here to confirm it"></textarea>
-											<span class="error__message" style="display: none;">Incorrect seed confirmation. Please, write down the seed exactly as shown.</span>
+											<textarea class="form__textarea" id="create-wallet-confirm-your-seed" name="create-wallet-confirm-your-seed" placeholder="Type your Seed here to confirm it" oninput="$('#seed-confirm-error').hide()"></textarea>
+											<span id="seed-confirm-error" class="error__message" style="display: none;">Incorrect seed confirmation.</span>
 										</label>
 										<button id="create-btn" class="home__form-btn btn-active">I’ve written down my seed, log me in</button>
 										<div class="error__notification" style="display: none;">
