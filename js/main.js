@@ -1345,6 +1345,158 @@ function add_new_address_20(type, bip39_acc_num=0)
             
 }
 
+function add_new_address_2(type, bip39_acc_num=0)
+{  
+    final_new_address = '';
+    try
+    {    
+     
+        for(y = 0; y < 2; y++)
+        {
+            //standard
+            if(type == 0)
+            {
+                final_at = account_keys_legacy.length;
+                if(seed_type == "bip39")
+                {
+                    child = reserved_data_root_bip39.derivePath("m/44'/0'/" + (bip39_acc_num-1) + "'/0/" + final_at.toString());
+                }
+                else
+                {
+                    child = reserved_data_root.derivePath('m/0/' + final_at.toString());
+                }
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2pkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }).address;
+                account_keys_legacy.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 0;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+            
+            //standard change
+            if(type == 3)
+            {
+                final_at = account_keys_legacy_change.length;
+                if(seed_type == "bip39")
+                {
+                    child = reserved_data_root_bip39.derivePath("m/44'/0'/" + (bip39_acc_num-1) + "'/1/" + final_at.toString());
+                }
+                else
+                {
+                    child = reserved_data_root.derivePath('m/1/' + final_at.toString());
+                }
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2pkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }).address;
+                account_keys_legacy_change.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 3;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+            
+            //segwit
+            if(type == 1)
+            {
+                final_at = account_keys_segwit.length;
+                if(seed_type == "bip39")
+                {
+                    child = reserved_data_root_bip39.derivePath("m/84'/0'/" + (bip39_acc_num-1) + "'/0/" + final_at.toString());
+                }
+                else
+                {
+                    child = reserved_data_root.derivePath("m/0'/0/" + final_at.toString());
+                }
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }).address;
+                account_keys_segwit.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 1;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+            
+            //segwit change
+            
+            if(type == 4)
+            {
+                final_at = account_keys_segwit_change.length;
+                if(seed_type == "bip39")
+                {
+                    child = reserved_data_root_bip39.derivePath("m/84'/0'/" + (bip39_acc_num-1) + "'/1/" + final_at.toString());
+                }
+                else
+                {
+                    child = reserved_data_root.derivePath("m/0'/1/" + final_at.toString());
+                }
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }).address;
+                account_keys_segwit_change.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 4;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+            
+            //p2sh
+            
+            if(type == 2)
+            {
+                final_at = account_keys_p2sh.length;
+                child = reserved_data_root_bip39.derivePath("m/49'/0'/" + (bip39_acc_num-1) + "'/0/" + final_at.toString());
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2sh({  redeem: bitcoinjs.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }) }).address;
+                account_keys_p2sh.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 2;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+            
+            //p2sh change
+            if(type == 5)
+            {
+                final_at = account_keys_p2sh_change.length;
+                child = reserved_data_root_bip39.derivePath("m/49'/0'/" + (bip39_acc_num-1) + "'/1/" + final_at.toString());
+                wif = child.toWIF();
+                public_addr = bitcoinjs.payments.p2sh({ redeem: bitcoinjs.payments.p2wpkh({ pubkey: child.publicKey, network: bitcoinjs.networks.bitcoin }) }).address;
+                account_keys_p2sh_change.push({"private": wif, "public": public_addr});
+                account_address_type[public_addr] = 5;
+                if(seed_type == "bip39")
+                {
+                    account_bip39_number[public_addr] = bip39_acc_num;
+                }
+                account_keys_new.push({"private": wif, "public": public_addr});
+                final_new_address = public_addr;
+            }
+        }
+                   
+    }
+    catch(e)
+    {
+        console.log(e);
+        return final_new_address;
+    }
+    
+    return final_new_address;
+            
+}
+
 function add_new_address_6(type, bip39_acc_num=0)
 {  
     final_new_address = '';
