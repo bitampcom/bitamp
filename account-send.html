@@ -1081,10 +1081,25 @@ function send_check_1()
                                     }
                                 }
                             
-                                process_create = get_address_index_valid_create_new(gen_new_address_xid);
+                                if(seed_type == "bip39")
+                                {
+                                    process_create = true;
+                                }
+                                else
+                                {
+                                    process_create = get_address_index_valid_create_new(gen_new_address_xid);
+                                }
+                                
                                 if(process_create == true)
                                 {
-                                    add_new_address_20(gen_new_address_type, acc_num);
+                                    if(seed_type == "bip39")
+                                    {
+                                        add_new_address_2(gen_new_address_type, acc_num);
+                                    }
+                                    else
+                                    {
+                                        add_new_address_20(gen_new_address_type, acc_num);
+                                    }
                                 }
                             }
                         }
