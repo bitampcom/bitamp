@@ -16,8 +16,8 @@ $("#header-top-description").text("View each address associated with your accoun
 			<div class="row">
 				<div class="account__block">
 					<div class="account__top-wrap">
-						<div class="account__block-title">Addresses list</div>
-                        <select id="address-type" style="margin-left: 5px;" onchange="update_addresses()">
+						<div class="account__block-title account__addresses-list-title">Addresses list</div>
+                        <select class="account__select form__select" id="address-type" style="margin-left: 5px;" onchange="update_addresses()">
                         <option value="standard">standard (1xx)</option>
                         <option value="segwit">segwit (bxx)</option>
                         <option value="p2sh">p2sh (3xx)</option>
@@ -292,7 +292,7 @@ $("#header-top-description").text("View each address associated with your accoun
                             
                             var element_1_1 = document.createElement("div");
                             element_1_1.setAttribute('class', 'account__item-col');
-                            element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; top:7px; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
+                            element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
                             element_1.appendChild(element_1_1);
                                                         
                             element_1_1 = document.createElement("div");
@@ -499,7 +499,7 @@ $("#header-top-description").text("View each address associated with your accoun
                                 
                                 var element_1_1 = document.createElement("div");
                                 element_1_1.setAttribute('class', 'account__item-col');
-                                element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; top:7px; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
+                                element_1_1.innerHTML = "<span id=\"cpy_" + finaladdresses[i] + "\" style=\"display:block;\">" + finaladdresses[i] + "</span><span style=\"display: none; position:relative; font-size:11px; color:#ff1b1b;\" id=\"pkey_" + finaladdresses[i] + "\"></span>";
                                 element_1.appendChild(element_1_1);
                                                             
                                 element_1_1 = document.createElement("div");

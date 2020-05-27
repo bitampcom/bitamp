@@ -17,7 +17,7 @@ $("#header-top-description").text("Your account overview and recent transactions
 		<div class="container">
 			<div class="row">
 				<div class="account__block" style="padding-bottom: 5px;">
-					<div class="account__row">
+					<div class="account__row account__receive-bitcoin">
 						<div class="account__input-wrap">
 							<div class="account__block-title">Receive Bitcoin</div>
 							<div>
@@ -282,13 +282,17 @@ $("#header-top-description").text("Your account overview and recent transactions
                                 }
                                 </script>
 							</div>
+                            <div class="account__wrapper-selected">
+                            <span class="account__selected-title">Selected receiving address:</span>
+                            <span class="account__selected-address" id="selected-address"></span>
+                            <span class="account__selected-copy copyready btn-copy2" id="copy-receive-address">copy</span>
+                            </div>
 						</div>
-						<div class="account__qr-wrap">
+						<div class="account__qr-wrap" style="margin-bottom:10px;">
                             <div id="qrcode-receive"></div>
 						</div>
 					</div>
                     <div class="account__row" style="position: relative; top: -50px;">
-                    <span style="font-weight:bold; text-decoration: underline;">Selected receiving address:</span><span id="selected-address" style="margin-left: 10px; color: #959595; font-size: 13px; line-height: 24px;"></span><span id="copy-receive-address" style="text-decoration: underline; font-size: 12px; color: #2c9afa; cursor: pointer; margin-left: 5px; line-height: 24px;">copy</span>
                     <script>
                     document.getElementById("copy-receive-address").onclick = function(){ copy_field("selected-address"); };
                     $("#copy-receive-address").addClass("copyready btn-copy2");
