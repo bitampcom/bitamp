@@ -23,6 +23,7 @@ var gen_new_address_xid = "";
 var last_was_max = false;
 
 var dust_threshold = 0.000009;
+var dust_threshold_security = 0.001;
 
 var allowed_url = [];
 allowed_url.push("bitpay.com");
@@ -171,6 +172,7 @@ function clear_send_fields()
     transaction_confirmed = false;
     exceeded_spendable = false;
     bitcoinamount = 0;
+    dustamount = 0;
     donationamount = 0;
     
     tx_bitcoinamount = 0;
@@ -244,6 +246,13 @@ function update_selected_outputs_changes()
 
 function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
 {
+    $(".btn-max").css("background-color", "#fff");
+    $(".btn-max").css("color", "#000");
+
+    if(page_name != "account-send")
+    {
+        return;
+    }
     if(reset_max == true)
     {
         last_was_max = false;
@@ -252,6 +261,7 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
     transaction_confirmed = false;
     exceeded_spendable = false;
     bitcoinamount = 0;
+    dustamount = 0;
     donationamount = 0;
     
     tx_bitcoinamount = 0;
@@ -329,6 +339,19 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
     var unconfirmed_utxo = [];
     var locked_utxo = [];
     
+    if(estimated_fee <= 0)
+    {
+        selected_utxo = [];
+        return false;
+    }
+    
+    dust_threshold = (estimated_fee/6);
+    
+    if(dust_threshold > dust_threshold_security)
+    {
+        dust_threshold = dust_threshold_security;
+    }
+  
     for(var u = 0; u < unspent_outputs.length; u++)
     {
         for(var d = 0; d < unspent_outputs[u].utxo.length; d++)
@@ -351,11 +374,19 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
                     {
                         confirmed_utxo.push(unspent_outputs[u].utxo[d]);
                     }
+                    else if(sending_max == true)
+                    {
+                        confirmed_utxo.push(unspent_outputs[u].utxo[d]);
+                    }
                     continue;
                 }
             }
             
             if((parseFloat(unspent_outputs[u].utxo[d].value)/100000000) > dust_threshold)
+            {
+                unconfirmed_utxo.push(unspent_outputs[u].utxo[d]);
+            }
+            else if(sending_max == true)
             {
                 unconfirmed_utxo.push(unspent_outputs[u].utxo[d]);
             }
@@ -405,14 +436,29 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
     {
         for(var u = 0; u < confirmed_utxo.length; u++)
         {
-             bitcoinamount += (parseFloat(confirmed_utxo[u].value)/100000000);
+             if((parseFloat(confirmed_utxo[u].value)/100000000) > dust_threshold)
+             {
+                bitcoinamount += (parseFloat(confirmed_utxo[u].value)/100000000);
+             }
+             else
+             {
+                dustamount += (parseFloat(confirmed_utxo[u].value)/100000000);
+             }
         }
         for(var u = 0; u < unconfirmed_utxo.length; u++)
         {
-             bitcoinamount += (parseFloat(unconfirmed_utxo[u].value)/100000000);
+            if((parseFloat(unconfirmed_utxo[u].value)/100000000) > dust_threshold)
+            {
+                bitcoinamount += (parseFloat(unconfirmed_utxo[u].value)/100000000);
+            }
+            else
+            {
+                dustamount += (parseFloat(unconfirmed_utxo[u].value)/100000000);
+            }
         }
         bitcoinamount -= donationamount;
-        
+        bitcoinamount += dustamount;
+  
         missing_amount = bitcoinamount + donationamount;
         
         if(bitcoinamount <= 0)
@@ -484,8 +530,8 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
             return false;
         }
     }
-    
-    tx_bitcoinamount = bitcoinamount;
+
+    tx_bitcoinamount = bitcoinamount - dustamount;
     tx_donationamount = donationamount;
     
     tx_amountchange = Math.abs(missing_amount);
@@ -627,15 +673,33 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
         
         if(payment_request_fee > 0)
         {
-            slow_added_fee = ((final_virtual_size/1000)*estimated_fee);
-            regular_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.05;
-            priority_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.1;
+            if(dustamount > 0)
+            {
+                slow_added_fee = ((final_virtual_size/1000)*estimated_fee) + (dustamount);
+                regular_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.05) + (dustamount);
+                priority_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.1) + (dustamount);
+            }
+            else
+            {
+                slow_added_fee = ((final_virtual_size/1000)*estimated_fee);
+                regular_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.05);
+                priority_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.1);
+            }
         }
         else
         {
-            slow_added_fee = ((final_virtual_size/1000)*estimated_fee)*0.8;
-            regular_added_fee = (final_virtual_size/1000)*estimated_fee;
-            priority_added_fee = ((final_virtual_size/1000)*estimated_fee)*1.1;
+            if(dustamount > 0)
+            {
+                slow_added_fee = ((final_virtual_size/1000)*estimated_fee) + (dustamount);
+                regular_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.05) + (dustamount);
+                priority_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.1) +(dustamount);
+            }
+            else
+            {
+                slow_added_fee = (((final_virtual_size/1000)*estimated_fee)*0.8);
+                regular_added_fee = ((final_virtual_size/1000)*estimated_fee);
+                priority_added_fee = (((final_virtual_size/1000)*estimated_fee)*1.1);
+            }
         }
         
         if(bitcoinamount <= priority_added_fee)
@@ -697,6 +761,12 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
     
     transaction_ready = true;
     
+    if(sending_max == true)
+    {
+        $(".btn-max").css("background-color", "#3ec964");
+        $(".btn-max").css("color", "#fff");
+    }
+    
     return true;
 }
 update_selected_outputs();
@@ -718,8 +788,15 @@ function send_start_loading()
 
 function send_stop_loading(success=false)
 {
+    
     if(send_is_loading == 1)
     {
+      if(success == false)
+        {
+            balance_modifier = 0;
+            force_update_balance();
+        }
+    
         $('#loading-page').hide();
      if(success==true)
      {

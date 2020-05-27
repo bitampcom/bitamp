@@ -57,7 +57,9 @@ function force_update_balance()
     {
         full_account_balance += (balance_modifier * 100000000);
     }
-  
+    
+    full_account_balance = Math.abs(full_account_balance);
+    
     if(btc_header_price == 1)
     {
           $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
