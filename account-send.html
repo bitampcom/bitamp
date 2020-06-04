@@ -159,9 +159,9 @@ function decode_payment_url(url)
 function clear_send_fields()
 {
     $("#bitcoinaddress").val("");
-    $("#priority_fee").text("Priority 0.00000000 BTC");
-    $("#regular_fee").text("Regular 0.00000000 BTC");
-    $("#slow_fee").text("Slow 0.00000000 BTC");
+    $("#priority_fee").text("Priority");
+    $("#regular_fee").text("Regular");
+    $("#slow_fee").text("Slow");
     
     $("#btc-amount-input").val("");
     $("#usd-amount-input").val("");
@@ -248,6 +248,13 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
 {
     $(".btn-max").css("background-color", "#fff");
     $(".btn-max").css("color", "#000");
+    
+    if(sending_max == true && added_fee == 0)
+    {
+        $("#btc-amount-input").val("");
+        $("#usd-amount-input").val("");
+        $("#donation-amount").val("0.00");
+    }
 
     if(page_name != "account-send")
     {
@@ -274,9 +281,9 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
 
     if(added_fee == 0)
     {
-        $("#priority_fee").text("Priority 0.00000000 BTC");
-        $("#regular_fee").text("Regular 0.00000000 BTC");
-        $("#slow_fee").text("Slow 0.00000000 BTC");
+        $("#priority_fee").text("Priority");
+        $("#regular_fee").text("Regular");
+        $("#slow_fee").text("Slow");
     }
  
     selected_utxo = [];
@@ -325,12 +332,46 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
     
     if(typeof unspent_outputs === 'undefined')
     {
+        if(bitcoinamount > 0)
+        {
+            $('#btc-amount-input').addClass("overlimitval");
+        }
+        else
+        {
+            $('#btc-amount-input').removeClass("overlimitval");
+        }
+        
+        if(donationamount > 0)
+        {
+            $('#donation-amount').addClass("overlimitval");
+        }
+        else
+        {
+            $('#donation-amount').removeClass("overlimitval");
+        }
         selected_utxo = [];
         return false;
     }
     
     if(unspent_outputs.length == 0)
     {
+        if(bitcoinamount > 0)
+        {
+            $('#btc-amount-input').addClass("overlimitval");
+        }
+        else
+        {
+            $('#btc-amount-input').removeClass("overlimitval");
+        }
+        
+        if(donationamount > 0)
+        {
+            $('#donation-amount').addClass("overlimitval");
+        }
+        else
+        {
+            $('#donation-amount').removeClass("overlimitval");
+        }
         selected_utxo = [];
         return false;
     }
@@ -522,9 +563,9 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
                 $('#donation-amount').removeClass("overlimitval");
             }
             
-            $("#priority_fee").text("Priority 0.00000000 BTC");
-            $("#regular_fee").text("Regular 0.00000000 BTC");
-            $("#slow_fee").text("Slow 0.00000000 BTC");
+            $("#priority_fee").text("Priority");
+            $("#regular_fee").text("Regular");
+            $("#slow_fee").text("Slow");
             exceeded_spendable = true;
             selected_utxo = [];
             return false;
@@ -704,9 +745,9 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
         
         if(bitcoinamount <= priority_added_fee)
         {
-            $("#priority_fee").text("Priority 0.00000000 BTC");
-            $("#regular_fee").text("Regular 0.00000000 BTC");
-            $("#slow_fee").text("Slow 0.00000000 BTC");
+            $("#priority_fee").text("Priority");
+            $("#regular_fee").text("Regular");
+            $("#slow_fee").text("Slow");
             exceeded_spendable = true;
             selected_utxo = [];
             return false;
@@ -1223,7 +1264,7 @@ function send_check_1()
                     <div id="transaction-sent-bx" style="text-align: center; margin-bottom: 30px; display: none;">
                     <div style="display: block;">
                     <img style="display: inline-block;" src="img/checkmark.svg" width="12px" height="12px">
-                    <span style="display: inline-block; color: #5be131; font-size: 15px;"></span>
+                    <span style="display: inline-block; color: #5be131; font-size: 15px;">Transaction Sent</span>
                     </div>
                     <span id="transaction-sent-tx" style="display: block; text-decoration: underline; color: #2796f6; font-size: 11px;"></span>
                     </div>
@@ -1313,9 +1354,9 @@ function send_check_1()
 								<div class="label__left-col">
 									<label class="form__label-text account__label-text" for="btc-priority">Transaction Fee:</label>
 									<select id="feetype" class="form__select" id="btc-priority" name="btc-priority" onchange="update_selected_outputs_changes()">
-                                        <option id="priority_fee" value="priority">Priority 0.00000000 BTC</option>
-                                        <option id="regular_fee" value="regular">Regular 0.00000000 BTC</option>
-                                        <option id="slow_fee" value="slow">Slow 0.00000000 BTC</option>
+                                        <option id="priority_fee" value="priority">Priority</option>
+                                        <option id="regular_fee" value="regular">Regular</option>
+                                        <option id="slow_fee" value="slow">Slow</option>
 									</select>
 								</div>
 								<div class="label__right-col">
