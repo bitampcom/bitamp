@@ -754,9 +754,9 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
         }
         
         //update fee text
-        $("#priority_fee").text("Priority " + priority_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
-        $("#regular_fee").text("Regular " + regular_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
-        $("#slow_fee").text("Slow " + slow_added_fee.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        $("#priority_fee").text("Priority " + priority_added_fee.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        $("#regular_fee").text("Regular " + regular_added_fee.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
+        $("#slow_fee").text("Slow " + slow_added_fee.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + " BTC");
         
         var feetype_select = document.getElementById('feetype');
         var selected_feetype = feetype_select.options[feetype_select.selectedIndex].value; 
@@ -767,7 +767,7 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
             {
                 if(sending_max == true)
                 {
-                    $("#btc-amount-input").val((bitcoinamount-priority_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    $("#btc-amount-input").val((bitcoinamount-priority_added_fee).toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
                     verifybtcamount(true);
                 }
                 update_selected_outputs(priority_added_fee, sending_max, false);
@@ -776,7 +776,7 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
             {
                 if(sending_max == true)
                 {
-                    $("#btc-amount-input").val((bitcoinamount-regular_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    $("#btc-amount-input").val((bitcoinamount-regular_added_fee).toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
                     verifybtcamount(true);
                 }
                 update_selected_outputs(regular_added_fee, sending_max, false);
@@ -785,7 +785,7 @@ function update_selected_outputs(added_fee=0, sending_max=false, reset_max=true)
             {
                 if(sending_max == true)
                 {
-                    $("#btc-amount-input").val((bitcoinamount-slow_added_fee).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                    $("#btc-amount-input").val((bitcoinamount-slow_added_fee).toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
                     verifybtcamount(true);
                 }
                 update_selected_outputs(slow_added_fee, sending_max, false);
@@ -895,24 +895,24 @@ function send_check_1()
     
     if(transaction_ready == true && transaction_confirmed == false)
     {
-       usd_amount = (parseFloat(tx_bitcoinamount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-       $('#tx-send-value').html('<strong style="color: #616161;">' + tx_bitcoinamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC</strong> (' + selected_currency_left[selected_currency] + usd_amount + ' ' + selected_currency + ')');
+       usd_amount = (parseFloat(tx_bitcoinamount)*parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+       $('#tx-send-value').html('<strong style="color: #616161;">' + tx_bitcoinamount.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC</strong> (' + selected_currency_left[selected_currency] + usd_amount + ' ' + selected_currency + ')');
        
        $('#tx-send-address').html('<strong>' + bitcoinaddress + '</strong>');
        
-       $('#tx-send-fee').html(tx_amountfees.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+       $('#tx-send-fee').html(tx_amountfees.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
        
        if(tx_donationamount > 0)
        {
         $('#donation-send-box').show();
-        $('#tx-send-donation').html(tx_donationamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+        $('#tx-send-donation').html(tx_donationamount.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
        }
        else
        {
         $('#donation-send-box').hide();
        }
     
-        $('#tx-send-btn').html('SEND ' + tx_bitcoinamount.toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
+        $('#tx-send-btn').html('SEND ' + tx_bitcoinamount.toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, "") + ' BTC');
 
        $('.home__modal-welcome').arcticmodal();
        
@@ -1293,7 +1293,7 @@ function send_check_1()
                                                     {
                                                         if(typeof decoded_value.options.amount !== 'undefined')
                                                         {
-                                                            $("#btc-amount-input").val((decoded_value.options.amount).toLocaleString(undefined, {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
+                                                            $("#btc-amount-input").val((decoded_value.options.amount).toLocaleString('en-US', {minimumFractionDigits: 8, maximumFractionDigits: 8}).replace(/,/g, ""));
                                                             verifybtcamount();
                                                         }
                                                     }
@@ -1436,7 +1436,7 @@ function send_check_1()
         }
         else
         {
-            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
+            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
             $("#usd-amount-input").val(usd_amount);
         }
         if(skipupdate == false)
@@ -1548,7 +1548,7 @@ function send_check_1()
         }
         else
         {
-            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
+            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
             $("#btc-amount-input").val(btc_amount);
         }
         update_selected_outputs();

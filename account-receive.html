@@ -411,7 +411,7 @@ $("#header-top-description").text("Share your public address below to receive Bi
         }
         else
         {
-            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
+            usd_amount = (parseFloat(check_amount)*parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/,/g, "");
             $("#usd-amount-input").val(usd_amount);
         }
         update_selected_receive_address();
@@ -466,7 +466,7 @@ $("#header-top-description").text("Share your public address below to receive Bi
         }
         else
         {
-            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
+            btc_amount = (parseFloat(check_amount)/parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 8}).replace(/,/g, "");
             $("#btc-amount-input").val(btc_amount);
         }
         update_selected_receive_address();

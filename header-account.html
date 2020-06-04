@@ -62,8 +62,8 @@ function force_update_balance()
     
     if(btc_header_price == 1)
     {
-          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
-          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
+          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
           $("#usdbalance").html(selected_currency_left[selected_currency] + usd_balance_amount.toString());
     }
 }               
@@ -180,7 +180,7 @@ function force_update_balance()
                                     prices = price_list;
                                     if(btc_header_price == 1 && Object.keys(prices).length > 0)
                                     {
-                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                         
                                         if(page_name == "account-receive" || page_name == "account-send")
                                         {
@@ -204,7 +204,7 @@ function force_update_balance()
                         {
                             if(btc_header_price == 1 && Object.keys(prices).length > 0)
                             {
-                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                 
                                 if(page_name == "account-receive" || page_name == "account-send")
                                 {
@@ -354,8 +354,8 @@ function force_update_balance()
                                     
                                     if(btc_header_price == 1)
                                     {
-                                          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
-                                          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                          $("#btcbalance").html(parseFloat(parseFloat(full_account_balance)/100000000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, ""));
+                                          usd_balance_amount = (parseFloat(parseFloat(full_account_balance)/100000000)*parseFloat(prices[selected_currency])).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                                           $("#usdbalance").html(selected_currency_left[selected_currency] + usd_balance_amount.toString());
                                     }
                                 }

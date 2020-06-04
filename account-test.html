@@ -17,7 +17,7 @@ $("#header-top-description").text("Your account overview and recent transactions
 		<div class="container">
 			<div class="row">
 				<div class="account__block" style="padding-bottom: 5px;">
-					<div class="account__row account__receive-bitcoin">
+					<div class="account__row">
 						<div class="account__input-wrap">
 							<div class="account__block-title">Receive Bitcoin</div>
 							<div>
@@ -282,17 +282,18 @@ $("#header-top-description").text("Your account overview and recent transactions
                                 }
                                 </script>
 							</div>
-                            <div class="account__wrapper-selected">
-                            <span class="account__selected-title">Selected receiving address:</span>
-                            <span class="account__selected-address" id="selected-address"></span>
-                            <span class="account__selected-copy" id="copy-receive-address">copy</span>
-                            </div>
-						</div>
-						<div class="account__qr-wrap" style="margin-bottom:10px;">
-                            <div id="qrcode-receive"></div>
 						</div>
 					</div>
-                    <div class="account__row" style="position: relative; top: -50px;">
+                    <div class="account__row" style="margin-top: 15px;">
+                        <div id="qrcode-receive" style="margin: auto;"></div>
+                    </div>
+                    <div class="account__row" style="position: relative;">
+                    <span style="font-weight:bold; text-decoration: underline; margin: auto;">Selected receiving address:</span>
+                    </div>
+                    <div class="account__row" style="position: relative;">
+                    <span style="margin: auto; text-align:center; margin-top:7px;">
+                    <span id="selected-address" style="margin-left: 10px; color: #959595; font-size: 13px; line-height: 24px;"></span><span id="copy-receive-address" style="text-decoration: underline; font-size: 12px; color: #2c9afa; cursor: pointer; margin-left: 5px; line-height: 24px;">copy</span>
+                    </span>
                     <script>
                     document.getElementById("copy-receive-address").onclick = function(){ copy_field("selected-address"); };
                     $("#copy-receive-address").addClass("copyready btn-copy2");
@@ -455,86 +456,35 @@ $("#header-top-description").text("Your account overview and recent transactions
                                                             add_new_account_bip39();
                                                         }
                                                     }
-                                                    
-                                                    if(seed_type == "bip39")
-                                                    {
-                                                        process_create = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        process_create = get_address_index_valid_create_new(xid);
-                                                    }
-                                                    
+                                                    process_create = get_address_index_valid_create_new(xid);
                                                     if(account_address_type[xid] == 0 && process_create == true)
                                                     {
-                                                        if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(0, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(0, acc_num);
-                                                        }
+                                                        add_new_address_20(0, acc_num);
                                                     }
                                                     else if(account_address_type[xid] == 1 && process_create == true)
                                                     {
                                                         //add new segwit address
-                                                        if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(1, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(1, acc_num);
-                                                        }
+                                                        add_new_address_20(1, acc_num);
                                                     }
                                                     else if(account_address_type[xid] == 2 && process_create == true)
                                                     {
                                                         //add new p2sh address
-                                                        if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(2, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(2, acc_num);
-                                                        }
+                                                        add_new_address_20(2, acc_num);
                                                     }
                                                     else if(account_address_type[xid] == 3 && process_create == true)
                                                     {
                                                         //add new standard change address
-                                                       if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(3, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(3, acc_num);
-                                                        }
+                                                        add_new_address_20(3, acc_num);
                                                     }
                                                     else if(account_address_type[xid] == 4 && process_create == true)
                                                     {
                                                         //add new segwit change address
-                                                        if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(4, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(4, acc_num);
-                                                        }
+                                                        add_new_address_20(4, acc_num);
                                                     }
                                                     else if(account_address_type[xid] == 5 && process_create == true)
                                                     {
                                                         //add new p2sh change address
-                                                        if(seed_type == "bip39")
-                                                        {
-                                                            add_new_address_2(5, acc_num);
-                                                        }
-                                                        else
-                                                        {
-                                                            add_new_address_20(5, acc_num);
-                                                        }
+                                                        add_new_address_20(5, acc_num);
                                                     }
                                                 }
                                                 account_total_tx[xid] = list_tx[xid][0];
@@ -789,87 +739,37 @@ $("#header-top-description").text("Your account overview and recent transactions
                                                                         add_new_account_bip39();
                                                                     }
                                                                 }
-                                                                
-                                                                if(seed_type == "bip39")
-                                                                {
-                                                                    process_create = true;
-                                                                }
-                                                                else
-                                                                {
-                                                                    process_create = get_address_index_valid_create_new(addr_info[0]);
-                                                                }
-                                                                
+                                                            
+                                                                process_create = get_address_index_valid_create_new(addr_info[0]);
                                                                 if(account_address_type[addr_info[0]] == 0 && process_create == true)
                                                                 {
                                                                     //add new standard address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(0, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(0, acc_num);
-                                                                    }
+                                                                    add_new_address_20(0, acc_num);
                                                                 }
                                                                 else if(account_address_type[addr_info[0]] == 1 && process_create == true)
                                                                 {
                                                                     //add new segwit address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(1, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(1, acc_num);
-                                                                    }
+                                                                    add_new_address_20(1, acc_num);
                                                                 }
                                                                 else if(account_address_type[addr_info[0]] == 2 && process_create == true)
                                                                 {
                                                                     //add new p2sh address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(2, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(2, acc_num);
-                                                                    }
+                                                                    add_new_address_20(2, acc_num);
                                                                 }
                                                                 else if(account_address_type[addr_info[0]] == 3 && process_create == true)
                                                                 {
                                                                     //add new standard change address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(3, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(3, acc_num);
-                                                                    }
+                                                                    add_new_address_20(3, acc_num);
                                                                 }
                                                                 else if(account_address_type[addr_info[0]] == 4 && process_create == true)
                                                                 {
                                                                     //add new segwit change address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(4, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(4, acc_num);
-                                                                    }
+                                                                    add_new_address_20(4, acc_num);
                                                                 }
                                                                 else if(account_address_type[addr_info[0]] == 5 && process_create == true)
                                                                 {
                                                                     //add new p2sh change address
-                                                                    if(seed_type == "bip39")
-                                                                    {
-                                                                        add_new_address_2(5, acc_num);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        add_new_address_20(5, acc_num);
-                                                                    }
+                                                                    add_new_address_20(5, acc_num);
                                                                 }
                                                                 i = 0;
                                                                 process_new_keys_timer = 10;

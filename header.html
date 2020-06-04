@@ -110,7 +110,7 @@ function copy_input(e)
                                     prices = price_list;
                                     if(btc_header_price == 1 && Object.keys(prices).length > 0)
                                     {
-                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                        $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                     }
                                     setTimeout(update_prices, 30000);
                             }).fail(function()
@@ -128,7 +128,7 @@ function copy_input(e)
                         {
                             if(btc_header_price == 1 && Object.keys(prices).length > 0)
                             {
-                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                                $("#btc-usd-price").html(selected_currency_left[selected_currency] + parseFloat(prices[selected_currency]).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                             }
                         }
                      

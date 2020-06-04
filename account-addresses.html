@@ -302,7 +302,7 @@ $("#header-top-description").text("View each address associated with your accoun
                             
                             element_1_1 = document.createElement("div");
                             element_1_1.setAttribute('class', 'account__item-col');
-                            element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                            element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
                             element_1.appendChild(element_1_1);
                             
                             element_1_1 = document.createElement("div");
@@ -510,7 +510,7 @@ $("#header-top-description").text("View each address associated with your accoun
                                 
                                 element_1_1 = document.createElement("div");
                                 element_1_1.setAttribute('class', 'account__item-col');
-                                element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
+                                element_1_1.innerHTML = parseFloat(parseFloat(finalbalances[i])/100000000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 8}).replace(/,/g, "");
                                 element_1.appendChild(element_1_1);
                                 
                                 element_1_1 = document.createElement("div");
